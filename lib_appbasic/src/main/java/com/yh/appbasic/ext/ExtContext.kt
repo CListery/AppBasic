@@ -5,7 +5,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.os.Process
 import androidx.core.content.getSystemService
-import com.yh.appinject.logger.LibLogs
+import com.yh.appbasic.logger.LibLogs
 
 /**
  *

@@ -2,7 +2,7 @@ package androidx.core.app;
 
 import android.os.Build;
 
-import com.yh.appinject.logger.LibLogs;
+import com.yh.appbasic.logger.LibLogs;
 
 /**
  * issue: https://github.com/evernote/android-job/issues/255

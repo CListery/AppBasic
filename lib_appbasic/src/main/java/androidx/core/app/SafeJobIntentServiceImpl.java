@@ -9,7 +9,7 @@ import android.os.IBinder;
 
 import androidx.annotation.RequiresApi;
 
-import com.yh.appinject.logger.LibLogs;
+import com.yh.appbasic.logger.LibLogs;
 
 /**
  * issue: https://github.com/evernote/android-job/issues/255

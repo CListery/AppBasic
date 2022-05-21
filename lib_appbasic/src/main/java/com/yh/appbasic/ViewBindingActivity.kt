@@ -6,7 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
-import com.yh.appinject.ext.isCurrentLooper
+import com.yh.appbasic.ext.isCurrentLooper
 import com.yh.appbasic.ext.memoryId
 
 abstract class ViewBindingActivity<VB : ViewBinding> : AppCompatActivity() {

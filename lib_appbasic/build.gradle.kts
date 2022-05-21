@@ -27,6 +27,8 @@ android {
         targetSdkVersion(AppConfig.targetSdk)
         versionCode(AppConfig.versionCode)
         versionName(AppConfig.versionName)
+        
+        buildConfigField("int", "LOG_METHOD_COUNT", "2")
     }
     lintOptions {
         isAbortOnError = false
@@ -42,7 +44,6 @@ android {
 dependencies {
     implementation(AppDependencies.baseLibs)
     compileOnly(AppDependencies.androidx.viewbinding)
-    compileOnly(AppDependencies.clistery.appinject)
 }
 
 val androidJavadocs by tasks.register<Javadoc>("androidJavadocs") {
