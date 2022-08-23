@@ -8,6 +8,6 @@ object AppConfig {
     
     const val GROUP_ID = "io.github.clistery"
     const val ARTIFACT_ID = "appbasic"
-    const val versionName = "1.0.1"
-    const val versionCode = 2
+    const val versionName = "1.1.0"
+    const val versionCode = 3
 }

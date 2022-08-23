@@ -2,10 +2,14 @@
 package com.yh.appbasic.ext
 
 import android.app.ActivityManager
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Process
 import androidx.core.content.getSystemService
 import com.yh.appbasic.logger.LibLogs
+import com.yh.appbasic.logger.logW
 
 /**
  *
@@ -51,4 +55,48 @@ fun Context.isMainProcess(): Boolean {
     } catch(e: Exception) {
         return false
     }
+}
+
+/**
+ * 杀死除当前进程之外的APP进程
+ */
+fun Context?.killAllOtherProcess() {
+    this?.getSystemService<ActivityManager>()?.runningAppProcesses?.forEach { ai ->
+        if (ai.uid == Process.myUid() && ai.pid != Process.myPid()) {
+            Process.killProcess(ai.pid)
+        }
+    }
+}
+
+/**
+ * 杀死除主进程之外的APP进程
+ */
+fun Context?.killProcessExceptMain() {
+    this?.getSystemService<ActivityManager>()?.runningAppProcesses?.forEach { ai ->
+        if (ai.uid != Process.myUid()) {
+            return@forEach
+        }
+        if (ai.processName == packageName) {
+            return@forEach
+        }
+        Process.killProcess(ai.pid)
+    }
+}
+
+inline fun Context?.listenScreenOff(crossinline onScreenOff: () -> Unit) {
+    if (null == this) return
+    val intentFilter = IntentFilter()
+    intentFilter.addAction(Intent.ACTION_SCREEN_OFF)
+    registerReceiver(object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (null == context || null == intent) {
+                return
+            }
+            unregisterReceiver(this)
+            if (Intent.ACTION_SCREEN_OFF == intent.action) {
+                logW("screen off!")
+                onScreenOff.invoke()
+            }
+        }
+    }, intentFilter)
 }

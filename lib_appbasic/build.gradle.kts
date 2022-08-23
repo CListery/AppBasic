@@ -43,6 +43,7 @@ android {
 
 dependencies {
     implementation(AppDependencies.baseLibs)
+    implementation(AppDependencies.kotlin.reflect)
     compileOnly(AppDependencies.androidx.viewbinding)
 }
 

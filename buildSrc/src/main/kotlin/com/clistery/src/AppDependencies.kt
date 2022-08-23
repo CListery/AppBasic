@@ -8,6 +8,7 @@ object AppDependencies {
         
         const val stdlib = "org.jetbrains.kotlin:kotlin-stdlib:${AppVersion.kotlin.version}"
         const val plugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${AppVersion.kotlin.version}"
+        const val reflect = "org.jetbrains.kotlin:kotlin-reflect:${AppVersion.kotlin.version}"
     }
     
     object dokka {
