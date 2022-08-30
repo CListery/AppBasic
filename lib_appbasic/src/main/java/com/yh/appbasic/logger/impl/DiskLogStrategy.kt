@@ -4,10 +4,10 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.util.Log
 import com.yh.appbasic.logger.LogStrategy
 import java.io.File
 import java.io.FileWriter
-import kotlin.concurrent.thread
 
 class DiskLogStrategy(private val handler: WriteHandler) : LogStrategy {
     
@@ -16,10 +16,10 @@ class DiskLogStrategy(private val handler: WriteHandler) : LogStrategy {
     }
     
     override fun log(priority: Int, tag: String, message: String) {
-        if(message.isNotEmpty()) {
+        if (message.isNotEmpty()) {
             try {
                 handler.sendMessage(handler.obtainMessage(priority, message))
-            } catch(e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
@@ -28,38 +28,40 @@ class DiskLogStrategy(private val handler: WriteHandler) : LogStrategy {
     override fun release() {
         try {
             handler.sendMessage(handler.obtainMessage(MSG_END))
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }
     
     class WriteHandler(
         looper: Looper,
-        private val logFile: File
+        private val logFile: File,
     ) : Handler(looper) {
         
         override fun handleMessage(msg: Message) {
-            if(MSG_END == msg.what) {
-                thread {
+            when (msg.what) {
+                MSG_END -> {
                     try {
-                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                             looper.quitSafely()
                         } else {
                             looper.quit()
                         }
-                    } catch(e: Exception) {
+                    } catch (e: Exception) {
                         e.printStackTrace()
                     }
                 }
-                return
-            }
-            val content = msg.obj
-            if(content !is String || content.isEmpty()) {
-                return
-            }
-            FileWriter(logFile, true).use {
-                it.append(content)
-                it.flush()
+                else -> {
+                    com.kotlin.runCatchingSafety {
+                        FileWriter(logFile, true).use {
+                            it.append(msg.obj.toString())
+                            it.flush()
+                        }
+                    }.onFailure {
+                        Log.e("LogsManager", msg.obj.toString(), it)
+                        throw it
+                    }
+                }
             }
         }
     }

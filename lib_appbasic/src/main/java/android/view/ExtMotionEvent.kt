@@ -1,9 +1,7 @@
 @file:Suppress("unused")
 @file:JvmName("ExtMotionEvent")
 
-package com.kotlin
-
-import android.view.MotionEvent
+package android.view
 
 
 /**

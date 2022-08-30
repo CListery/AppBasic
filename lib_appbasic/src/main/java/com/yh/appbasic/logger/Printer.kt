@@ -29,7 +29,7 @@ interface Printer {
      * @param [tag] 日志消息的给定标签
      * @return 返回该日志输出器实例
      */
-    fun t(@Nullable tag: String?): Printer?
+    fun t(@Nullable tag: String?): Printer
 
     /**
      * 输出 [Log.DEBUG] 日志
@@ -37,7 +37,7 @@ interface Printer {
      * @param [args] 需要格式化到 [message] 中的内容
      * @see Log.DEBUG
      */
-    fun d(@NonNull message: String, @Nullable vararg args: Any?)
+    fun d(@Nullable message: String? = null, @Nullable vararg args: Any?)
 
     /**
      * 输出 [Log.INFO] 日志
@@ -45,7 +45,7 @@ interface Printer {
      * @param [args] 需要格式化到 [message] 中的内容
      * @see Log.INFO
      */
-    fun i(@NonNull message: String, @Nullable vararg args: Any?)
+    fun i(@Nullable message: String? = null, @Nullable vararg args: Any?)
 
     /**
      * 输出 [Log.VERBOSE] 日志
@@ -53,7 +53,7 @@ interface Printer {
      * @param [args] 需要格式化到 [message] 中的内容
      * @see Log.VERBOSE
      */
-    fun v(@NonNull message: String, @Nullable vararg args: Any?)
+    fun v(@Nullable message: String? = null, @Nullable vararg args: Any?)
 
     /**
      * 输出 [Log.WARN] 日志
@@ -61,7 +61,7 @@ interface Printer {
      * @param [args] 需要格式化到 [message] 中的内容
      * @see Log.WARN
      */
-    fun w(@NonNull message: String, @Nullable vararg args: Any?)
+    fun w(@Nullable message: String? = null, @Nullable vararg args: Any?)
 
     /**
      * 输出 [Log.ERROR] 日志
@@ -69,7 +69,7 @@ interface Printer {
      * @param [args] 需要格式化到 [message] 中的内容
      * @see Log.ERROR
      */
-    fun e(@NonNull message: String, @Nullable vararg args: Any?)
+    fun e(@Nullable message: String? = null, @Nullable vararg args: Any?)
 
     /**
      * 输出携带异常信息的 [Log.ERROR] 日志
@@ -78,7 +78,7 @@ interface Printer {
      * @param [args] 需要格式化到 [message] 中的内容
      * @see Log.ERROR
      */
-    fun e(@Nullable throwable: Throwable?, @NonNull message: String, @Nullable vararg args: Any?)
+    fun e(@Nullable throwable: Throwable? = null, @Nullable message: String? = null, @Nullable vararg args: Any?)
 
     /**
      * 输出 [Log.ASSERT] 日志
@@ -86,7 +86,7 @@ interface Printer {
      * @param [args] 需要格式化到 [message] 中的内容
      * @see Log.ASSERT
      */
-    fun wtf(@NonNull message: String, @Nullable vararg args: Any?)
+    fun wtf(@Nullable message: String? = null, @Nullable vararg args: Any?)
 
     /**
      * 输出 JSON 文本日志

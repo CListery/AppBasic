@@ -1,15 +1,11 @@
 @file:JvmName("ExtContext")
-package com.yh.appbasic.ext
+package android.content
 
 import android.app.ActivityManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Process
 import androidx.core.content.getSystemService
-import com.yh.appbasic.logger.LibLogs
 import com.yh.appbasic.logger.logW
+import com.yh.appbasic.logger.owner.AppLogger
 
 /**
  *
@@ -31,10 +27,10 @@ fun Context.isMainProcess(): Boolean {
         val mainProcessName = packageName
         val myPid = Process.myPid()
         if(processes.isEmpty()) {
-            LibLogs.logW("isMainProcess get getRunningAppProcesses empty", "App")
+            logW("RunningAppProcesses empty", AppLogger)
             val processList = am.getRunningServices(Int.MAX_VALUE)
             if(null == processList || processList.isEmpty()) {
-                LibLogs.logW("isMainProcess get getRunningServices empty", "App")
+                logW("RunningServices empty", AppLogger)
                 return false
             } else {
                 processList.forEach { rsi ->

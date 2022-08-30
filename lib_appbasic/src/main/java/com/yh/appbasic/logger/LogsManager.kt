@@ -1,114 +1,253 @@
 package com.yh.appbasic.logger
 
-import androidx.annotation.Nullable
-import com.yh.appbasic.logger.impl.TheLogAdapter
-import com.yh.appbasic.logger.impl.TheLogFormatStrategy
+import android.app.ActivityManager
+import android.content.Context
+import android.os.Process
+import androidx.core.content.getSystemService
+import com.kotlin.differenceDay
+import com.kotlin.timeCurMillisecond
+import com.kotlin.timeFormatDate
+import com.kotlin.timeParseDate
+import com.yh.appbasic.init.AppBasicShare
+import com.yh.appbasic.init.BasicInitializer
+import com.yh.appbasic.logger.impl.DiskLogFormatStrategy
 import com.yh.appbasic.logger.impl.TheLogPrinter
+import com.yh.appbasic.logger.owner.AppLogger
+import com.yh.appbasic.logger.owner.LibLogger
+import com.yh.appbasic.util.FileUtils
+import com.yh.appbasic.util.FileUtils.getCacheSubDirByName
+import java.io.File
+import java.io.FileReader
+import java.io.FileWriter
+import java.util.*
+import kotlin.concurrent.thread
+import kotlin.math.abs
 
 /**
  * 日志管理器
  *
  * Created by CYH on 2020/5/14 13:44
  */
-class LogsManager private constructor() {
-    
-    companion object {
-        @JvmStatic
-        private val mInstances by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) { LogsManager() }
-        
-        /**
-         * 获取日志管理器单例
-         */
-        @JvmStatic
-        fun get() = mInstances
-    }
+object LogsManager : ILoggable {
     
     /**
      * 日志输出器实例
      */
-    private val mPrinter = TheLogPrinter()
+    private val printer = TheLogPrinter()
     
-    /**
-     * 库与日志适配器的映射关系
-     */
-    private val mMap: HashMap<ILogOwner, LogAdapter> = hashMapOf()
+    @JvmStatic
+    internal var diskLogRootDirName = "logs"
+    private val diskLogLockDirName: String = "${diskLogRootDirName}/lock"
     
-    /**
-     * 库的默认日志适配器
-     */
-    private val mDefaultLibAdapter by lazy {
-        TheLogAdapter(TheLogFormatStrategy.newBuilder().setFirstTag("Library").build())
+    private const val DATE_FORMAT = "yyyyMMdd"
+    
+    @JvmStatic
+    internal val diskLogFileName: () -> String = {
+        timeCurMillisecond.timeFormatDate(DATE_FORMAT)
     }
     
     /**
-     * 应用的默认日志适配器
+     * 日志保留的最大时间
      */
-    private val mDefaultAppAdapter by lazy {
-        TheLogAdapter(TheLogFormatStrategy.newBuilder().setFirstTag("APP").build())
+    @JvmStatic
+    private var diskLogKeepDay = 3
+    fun diskLogKeepDay(keepDay: Int) {
+        this.diskLogKeepDay = keepDay
+    }
+    
+    @JvmStatic
+    fun cleanup(context: Context, keepDiskLog: Boolean = true) {
+        logD("cleanup", loggable = LogsManager)
+        context.cleanupDiskLogs(keepDiskLog)
     }
     
     /**
-     * 设置默认日志适配器的配置
+     * 根据 [LogOwner] 获取 [Printer]
      *
-     * @param libConfig [mDefaultLibAdapter]
-     * @param appConfig [mDefaultAppAdapter]
-     * @see ILogOwner.loggerConfig
-     */
-    fun setDefLoggerConfig(
-        @Nullable libConfig: Pair<Boolean, Int>? = null,
-        @Nullable appConfig: Pair<Boolean, Int>? = null
-    ) {
-        if (null != libConfig) {
-            mDefaultLibAdapter.setConfig(libConfig)
-        }
-        if (null != appConfig) {
-            mDefaultAppAdapter.setConfig(appConfig)
-        }
-    }
-    
-    /**
-     * 安装库的日志适配器
-     * @param [owner] [ILogOwner]
-     * @param [adapter] [LogAdapter]
-     */
-    fun install(owner: ILogOwner, adapter: LogAdapter) {
-        mMap[owner] = adapter
-    }
-    
-    /**
-     * 卸载库的日志适配器
-     * @param [owner] [ILogOwner]
-     */
-    fun uninstall(owner: ILogOwner) {
-        mMap.remove(owner)
-    }
-    
-    /**
-     * 根据[LogAdapter]获取[Printer]
-     * @param [adapter] [LogAdapter]
      * @return [Printer]
+     *  - default [AppLogger]
      */
-    @Nullable
-    fun with(adapter: LogAdapter?): Printer {
-        if (null == adapter) {
-            return mPrinter.adapter(mDefaultLibAdapter)
+    @JvmStatic
+    fun switchPrinter(printerProvider: ILoggable?): Printer {
+        val tag = printerProvider?.javaClass?.simpleName
+        return when (printerProvider) {
+            is LogsManager -> switchPrinter(LibLogger).t(tag)
+            is BasicInitializer -> switchPrinter(printerProvider.logger).t(tag)
+            is LogOwner -> switchPrinter(printerProvider.logAdapter).t(printerProvider.logTag())
+            is LogAdapter -> printer.adapter(printerProvider)
+            is ILoggable -> switchPrinter(AppLogger.logAdapter).t(tag)
+            else -> switchPrinter(AppLogger.logAdapter).t(AppLogger.logTag())
         }
-        return mPrinter.adapter(adapter)
     }
     
-    /**
-     * 根据[ILogOwner]获取[Printer]
-     * @param [owner] [ILogOwner]
-     * @return [Printer]
-     */
-    @Nullable
-    fun with(owner: ILogOwner?): Printer? {
-        if (null == owner) {
-            return mPrinter.adapter(mDefaultAppAdapter)
+    @JvmStatic
+    private fun Context.cleanupDiskLogs(keepDiskLog: Boolean) {
+        logD("cleanupDiskLogs", loggable = LogsManager)
+        val appProcesses = getSystemService<ActivityManager>()?.runningAppProcesses
+        val allPid = appProcesses?.map { it.pid }
+        
+        fun allLocks(): List<LogLock>? {
+            val diskLogLockDir = getCacheSubDirByName(diskLogLockDirName)
+            val lockFiles = diskLogLockDir.listFiles()
+            
+            val locks = lockFiles?.map { lockedFile ->
+                val token = lockedFile.nameWithoutExtension.split("-@-")
+                val pid = token[0].toIntOrNull() ?: -1
+                val time = token[1].toLongOrNull() ?: 0L
+                val logFileName = token[2]
+                LogLock(pid, time, logFileName, lockedFile)
+            }
+            
+            return locks?.filter {
+                val result: Boolean = if (!allPid.isNullOrEmpty()) {
+                    allPid.contains(it.pid)
+                } else {
+                    // 直接干掉超过一天的锁
+                    abs(System.currentTimeMillis() - it.time) > 86400000
+                }
+                if (!result) {
+                    it.lockFile.delete()
+                }
+                return@filter result
+            }
         }
-        if (mMap.contains(owner)) {
-            return mPrinter.adapter(mMap[owner])
+        
+        thread {
+            synchronized(LogsManager) {
+                val diskLogRootDir = getCacheSubDirByName(diskLogRootDirName)
+                val cleanupLockFile = File(diskLogRootDir, "cleanup.lock")
+                if (cleanupLockFile.exists()) {
+                    val readTokens = FileReader(cleanupLockFile).readText().trim().split(",")
+                    if (readTokens.size == 4) {
+                        val pid = readTokens[0].toIntOrNull() ?: -1
+                        //                    val tid = readTokens[1].toIntOrNull()
+                        //                    val uuid = readTokens[2]
+                        val time = readTokens[3].toLongOrNull() ?: 0L
+                        if (-1 != pid) {
+                            if (!allPid.isNullOrEmpty()) {
+                                if (allPid.contains(pid)) {
+                                    return@thread
+                                } else {
+                                    cleanupLockFile.delete()
+                                    return@thread
+                                }
+                            }
+                        }
+                        // 检查锁是否超过10秒
+                        if (abs(System.currentTimeMillis() - time) <= 10000) {
+                            return@thread
+                        }
+                    }
+                    cleanupLockFile.delete()
+                }
+                val token = listOf(
+                    Process.myPid(),
+                    Process.myTid(),
+                    UUID.randomUUID(),
+                    System.currentTimeMillis(),
+                ).joinToString(",")
+                FileWriter(cleanupLockFile, false).use {
+                    it.appendLine(token)
+                }
+                val locks = allLocks()
+                logD(
+                    "valid locks: $locks",
+                    loggable = LogsManager,
+                )
+                FileUtils.deleteAll(diskLogRootDir) { f: File ->
+                    if (f.isDirectory) {
+                        return@deleteAll false
+                    }
+                    if (f == cleanupLockFile) {
+                        return@deleteAll true
+                    }
+                    val fileName = f.nameWithoutExtension
+                    if (null != locks?.find { lock -> lock.logFileName == fileName || lock.lockFile == f }) {
+                        return@deleteAll true
+                    }
+                    if (keepDiskLog) {
+                        val date =
+                            fileName.split(DiskLogFormatStrategy.LOG_FILE_NAME_SEPARATOR)
+                                .lastOrNull().timeParseDate(DATE_FORMAT)
+                        val day = date?.differenceDay(Calendar.getInstance())
+                        if (null != day) {
+                            if (day < diskLogKeepDay) {
+                                return@deleteAll true
+                            }
+                        }
+                    }
+                    return@deleteAll false
+                }
+                cleanupLockFile.delete()
+            }
         }
-        return null
     }
+    
+    @JvmStatic
+    internal fun diskLogLocked(logFile: File) {
+        thread {
+            synchronized(LogsManager) {
+                val context = AppBasicShare.get<BasicInitializer>()?.appContext
+                if (null != context) {
+                    val fileName = logFile.nameWithoutExtension
+                    val diskLogLockDir = context.getCacheSubDirByName(diskLogLockDirName)
+                    val lockFiles = diskLogLockDir.listFiles()
+                    
+                    val lock = lockFiles?.find { it.name.contains(fileName) }?.let {
+                        val token = it.nameWithoutExtension.split("-@-")
+                        val pid = token[0].toIntOrNull() ?: -1
+                        val time = token[1].toLongOrNull() ?: 0L
+                        val logFileName = token[2]
+                        LogLock(pid, time, logFileName, it)
+                    }
+                    if (null != lock) {
+                        if (lock.pid == Process.myPid()) {
+                            return@thread
+                        }
+                        lock.lockFile.delete()
+                    }
+                    val token = listOf(
+                        Process.myPid(),
+                        System.currentTimeMillis(),
+                        fileName,
+                    ).joinToString("-@-")
+                    logD(
+                        "diskLogLocked: $token",
+                        loggable = LogsManager,
+                    )
+                    File(context.getCacheSubDirByName(diskLogLockDirName),
+                        token.plus(".lock")).createNewFile()
+                }
+            }
+        }
+    }
+    
+    @JvmStatic
+    internal fun diskLogUnLocked(logFile: File) {
+        thread {
+            synchronized(LogsManager) {
+                val context = AppBasicShare.get<BasicInitializer>()?.appContext
+                if (null != context) {
+                    val fileName = logFile.nameWithoutExtension
+                    val diskLogLockDir = context.getCacheSubDirByName(diskLogLockDirName)
+                    val lockFiles = diskLogLockDir.listFiles()
+                    val lockFile = lockFiles?.find { it.nameWithoutExtension.contains(fileName) }
+                    if (true == lockFile?.exists()) {
+                        logD(
+                            "diskLogUnLocked: $fileName ${lockFile.nameWithoutExtension}",
+                            loggable = LogsManager,
+                        )
+                        lockFile.delete()
+                    }
+                }
+            }
+        }
+    }
+    
+    data class LogLock(
+        val pid: Int,
+        val time: Long,
+        val logFileName: String,
+        val lockFile: File,
+    )
 }

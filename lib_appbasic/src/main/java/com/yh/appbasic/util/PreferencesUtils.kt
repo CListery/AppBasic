@@ -5,15 +5,16 @@ package com.yh.appbasic.util
 import android.content.Context
 import android.content.SharedPreferences
 
-private object PrefConst {
-    const val DEF_FILE_NAME = "common"
+object PreferenceConst {
+    @JvmStatic
+    var DEF_FILE_NAME = "common"
 }
 
 private val preferences = hashMapOf<String, SharedPreferences>()
 
 fun Context.preference(preferenceName: String?): SharedPreferences {
     return preferences.getOrPut(
-        preferenceName ?: PrefConst.DEF_FILE_NAME,
+        preferenceName ?: PreferenceConst.DEF_FILE_NAME,
         defaultValue = {
             getSharedPreferences(preferenceName, Context.MODE_PRIVATE)
         },

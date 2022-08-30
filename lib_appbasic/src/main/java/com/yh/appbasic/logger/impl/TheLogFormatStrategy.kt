@@ -1,13 +1,13 @@
 package com.yh.appbasic.logger.impl
 
 import android.os.Process
-import android.text.TextUtils
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import com.yh.appbasic.BuildConfig
 import com.yh.appbasic.logger.FormatStrategy
 import com.yh.appbasic.logger.LogStrategy
 import kotlin.math.min
+import kotlin.reflect.KClass
 
 /**
  * 默认日志格式化工具
@@ -57,7 +57,6 @@ class TheLogFormatStrategy private constructor(builder: Builder) : FormatStrateg
         stackFilterClassNames = builder.getStackFilter()
         showThreadInfo = builder.isShowThreadInfo()
         logStrategy = builder.getLogStrategy()
-            ?: LogcatLogStrategy()
         firstTag = builder.getFirstTag()
     }
 
@@ -161,8 +160,8 @@ class TheLogFormatStrategy private constructor(builder: Builder) : FormatStrateg
 
     @Nullable
     private fun formatTag(@Nullable onceOnlyTag: String?): String {
-        return if (!onceOnlyTag.isNullOrEmpty() && !TextUtils.equals(firstTag, onceOnlyTag)) {
-            firstTag.plus('-').plus(onceOnlyTag)
+        return if (!onceOnlyTag.isNullOrEmpty() && firstTag != onceOnlyTag) {
+            "${firstTag}-${onceOnlyTag}"
         } else {
             firstTag
         }
@@ -185,7 +184,7 @@ class TheLogFormatStrategy private constructor(builder: Builder) : FormatStrateg
          * 日志输出方式实例
          */
         @Nullable
-        private var logStrategy: LogStrategy? = null
+        private var logStrategy: LogStrategy = LogcatLogStrategy()
         /**
          * 默认日志标签
          */
@@ -196,8 +195,6 @@ class TheLogFormatStrategy private constructor(builder: Builder) : FormatStrateg
          */
         private val stackFilterClassNames = hashSetOf(
             Class.forName("com.yh.appbasic.logger.Logs").name,
-            Class.forName("com.yh.appbasic.logger.LibLogs").name,
-            Class.forName("com.yh.appbasic.logger.ext.ExtILogOwner").name,
             TheLogPrinter::class.java.name
         )
 
@@ -209,10 +206,16 @@ class TheLogFormatStrategy private constructor(builder: Builder) : FormatStrateg
         /**
          * 设置堆栈过滤
          */
+        fun setStackFilter(vararg clazz: KClass<*>): Builder {
+            stackFilterClassNames.addAll(clazz.map { it.java.name })
+            return this
+        }
+
+        /**
+         * 设置堆栈过滤
+         */
         fun setStackFilter(vararg clazz: Class<*>): Builder {
-            clazz.forEach {
-                stackFilterClassNames.add(it.name)
-            }
+            stackFilterClassNames.addAll(clazz.map { it.name })
             return this
         }
 
@@ -253,7 +256,7 @@ class TheLogFormatStrategy private constructor(builder: Builder) : FormatStrateg
          * 设置日志输出方式实例
          */
         @NonNull
-        fun setLogStrategy(@Nullable strategy: LogStrategy?): Builder {
+        fun setLogStrategy(@NonNull strategy: LogStrategy): Builder {
             logStrategy = strategy
             return this
         }

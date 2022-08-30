@@ -5,6 +5,12 @@ package com.kotlin
 
 import com.yh.appbasic.logger.logE
 
+/**
+ * 提供该对象的(伪)内存地址，只能用作参考
+ *
+ * * 请不要通过该值来比较对象是否相同
+ */
+val Any?.memoryId get() = System.identityHashCode(this).toString(16)
 
 /**
  * 将对象数组转为字符串并排列为 "(字符串1): (字符串2)(字符串3)(字符串4)..."
@@ -56,6 +62,18 @@ inline fun <T, R> T?.runCatchingSafety(
     block: T.() -> R
 ): Result<R> {
     val result = this?.runCatching(block) ?: Result.failure(NullPointerException("T is null"))
+    if (result.isFailure && printCatching) {
+        logE("invoke block failed!", throwable = result.exceptionOrNull())
+    }
+    return result
+}
+
+@JvmOverloads
+inline fun <R> runCatchingSafety(
+    printCatching: Boolean = true,
+    block: () -> R
+): Result<R> {
+    val result = runCatching(block)
     if (result.isFailure && printCatching) {
         logE("invoke block failed!", throwable = result.exceptionOrNull())
     }

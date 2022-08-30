@@ -9,7 +9,8 @@ import android.os.IBinder;
 
 import androidx.annotation.RequiresApi;
 
-import com.yh.appbasic.logger.LibLogs;
+import com.yh.appbasic.logger.Logs;
+import com.yh.appbasic.logger.owner.LibLogger;
 
 /**
  * issue: https://github.com/evernote/android-job/issues/255
@@ -47,7 +48,7 @@ class SafeJobIntentServiceImpl extends JobServiceEngine implements JobIntentServ
                     }catch(SecurityException | IllegalArgumentException exception){
                         // ignore lang.IllegalArgumentException: Given work is not active: JobWorkItem
                         // ignore SecurityException: Caller no longer running
-                        LibLogs.logE("block crash", null, null, exception);
+                        Logs.logE("block crash", exception, LibLogger.INSTANCE);
                     }
                 }
             }
@@ -66,7 +67,7 @@ class SafeJobIntentServiceImpl extends JobServiceEngine implements JobIntentServ
     
     @Override
     public boolean onStartJob(JobParameters params){
-        LibLogs.logD("onStartJob: " + params);
+        Logs.logD("onStartJob: " + params, LibLogger.INSTANCE);
         mParams = params;
         // We can now start dequeuing work!
         mService.ensureProcessorRunningLocked(false);
@@ -75,7 +76,7 @@ class SafeJobIntentServiceImpl extends JobServiceEngine implements JobIntentServ
     
     @Override
     public boolean onStopJob(JobParameters params){
-        LibLogs.logD("onStartJob: " + params);
+        Logs.logD("onStartJob: " + params, LibLogger.INSTANCE);
         boolean result = mService.doStopCurrentWork();
         synchronized(mLock){
             // Once we return, the job is stopped, so its JobParameters are no
@@ -99,7 +100,7 @@ class SafeJobIntentServiceImpl extends JobServiceEngine implements JobIntentServ
                 work = mParams.dequeueWork();
             }catch(SecurityException se){
                 //ignore
-                LibLogs.logE("block crash", null, null, se);
+                Logs.logE("block crash", se, LibLogger.INSTANCE);
             }
         }
         if(work != null){

@@ -14,7 +14,6 @@ import com.yh.appbasic.logger.Printer
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.PrintWriter
 import java.io.StringReader
 import java.io.StringWriter
 import javax.xml.transform.OutputKeys
@@ -23,6 +22,7 @@ import javax.xml.transform.TransformerException
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.stream.StreamResult
 import javax.xml.transform.stream.StreamSource
+import kotlin.Throwable
 
 /**
  * 日志输出器实例
@@ -59,42 +59,38 @@ internal class TheLogPrinter : Printer {
     }
 
     override fun t(tag: String?): Printer {
-        if (tag != null) {
+        if (!tag.isNullOrEmpty()) {
             localTag.set(tag)
         }
         return this
     }
 
-    //    override fun d(@Nullable message: Any?) {
-    //        log(Log.DEBUG, null, message?.toString())
-    //    }
-
-    override fun d(@NonNull message: String, @Nullable vararg args: Any?) {
-        log(Log.DEBUG, null, message, *args)
+    override fun d(@Nullable message: String?, @Nullable vararg args: Any?) {
+        log(priority = Log.DEBUG, msg = message, args = args)
     }
 
-    override fun i(@NonNull message: String, @Nullable vararg args: Any?) {
-        log(Log.INFO, null, message, *args)
+    override fun i(@Nullable message: String?, @Nullable vararg args: Any?) {
+        log(priority = Log.INFO, msg = message, args = args)
     }
 
-    override fun v(@NonNull message: String, @Nullable vararg args: Any?) {
-        log(Log.VERBOSE, null, message, *args)
+    override fun v(@Nullable message: String?, @Nullable vararg args: Any?) {
+        log(priority = Log.VERBOSE, msg = message, args = args)
     }
 
-    override fun w(@NonNull message: String, @Nullable vararg args: Any?) {
-        log(Log.WARN, null, message, *args)
+    override fun w(@Nullable message: String?, @Nullable vararg args: Any?) {
+        log(priority = Log.WARN, msg = message, args = args)
     }
 
-    override fun e(@NonNull message: String, @Nullable vararg args: Any?) {
-        log(Log.ERROR, null, message, *args)
+    override fun e(@Nullable message: String?, @Nullable vararg args: Any?) {
+        log(priority = Log.ERROR, msg = message, args = args)
     }
 
-    override fun e(@Nullable throwable: Throwable?, @NonNull message: String, @Nullable vararg args: Any?) {
-        log(Log.ERROR, throwable, message, *args)
+    override fun e(@Nullable throwable: Throwable?, @Nullable message: String?, @Nullable vararg args: Any?) {
+        log(priority = Log.ERROR, throwable = throwable, msg = message, args = args)
     }
 
-    override fun wtf(@NonNull message: String, @Nullable vararg args: Any?) {
-        log(Log.ASSERT, null, message, *args)
+    override fun wtf(@Nullable message: String?, @Nullable vararg args: Any?) {
+        log(priority = Log.ASSERT, msg = message, args = args)
     }
 
     override fun json(jsonAny: Any?) {
@@ -243,20 +239,20 @@ internal class TheLogPrinter : Printer {
         }
     }
 
-    override fun log(priority: Int, tag: String?, message: String?, throwable: Throwable?) {
-        val newMsg = StringBuilder(message ?: "")
-        if (null != throwable) {
-            if (!TextUtils.isEmpty(newMsg)) {
-                newMsg.append(" : ")
-            }
-            newMsg.append(getStackTraceString(throwable))
-        }
-        if (TextUtils.isEmpty(newMsg)) {
-            newMsg.append("Empty/NULL log message")
-        }
+    override fun log(priority: Int, @Nullable tag: String?, @Nullable message: String?, @Nullable throwable: Throwable?) {
         val adapter = getAdapter()
             ?: return
         if (adapter.isLoggable(priority, tag)) {
+            val newMsg = StringBuilder(message ?: "")
+            if (null != throwable) {
+                if (newMsg.isNotEmpty()) {
+                    newMsg.append(" : ")
+                }
+                newMsg.append(throwable.stackTraceToString().trimEnd())
+            }
+            if (newMsg.isEmpty()) {
+                newMsg.append("Empty/NULL log message")
+            }
             adapter.log(priority, tag, newMsg.toString())
         }
     }
@@ -265,9 +261,9 @@ internal class TheLogPrinter : Printer {
      * This method is synchronized in order to avoid messy of logs' order.
      */
     @Synchronized
-    private fun log(priority: Int, @Nullable throwable: Throwable?, @Nullable msg: String?, @Nullable vararg args: Any?) {
+    private fun log(priority: Int, @Nullable throwable: Throwable? = null, @Nullable msg: String? = null, @Nullable vararg args: Any?) {
         val tag = getTag()
-        val message = createMessage(msg, *args)
+        val message = createMessage(msg ?: "", *args)
         log(priority, tag, message, throwable)
     }
 
@@ -292,35 +288,23 @@ internal class TheLogPrinter : Printer {
     }
 
     @NonNull
-    private fun createMessage(@Nullable message: String?, @Nullable vararg args: Any?): String {
-        val newMsg = message
-            ?: ""
-        return if (TextUtils.isEmpty(newMsg)) {
+    private fun createMessage(@NonNull message: String, @Nullable vararg args: Any?): String {
+        return if (message.isEmpty()) {
             if (args.isNotEmpty()) {
                 args.contentToString()
             } else {
-                newMsg
+                message
             }
         } else {
             if (args.isNotEmpty()) {
                 try {
-                    String.format(newMsg, *args)
+                    String.format(message, *args)
                 } catch (e: Exception) {
-                    newMsg.plus(args.contentToString())
+                    message.plus(args.contentToString())
                 }
             } else {
-                newMsg
+                message
             }
         }
-    }
-
-    private fun getStackTraceString(t: Throwable): String {
-        // Don't replace this with Log.getStackTraceString() - it hides
-        // UnknownHostException, which is not what we want.
-        val sw = StringWriter(256)
-        val pw = PrintWriter(sw, false)
-        t.printStackTrace(pw)
-        pw.flush()
-        return sw.toString()
     }
 }

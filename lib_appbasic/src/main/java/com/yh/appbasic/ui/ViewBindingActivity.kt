@@ -1,4 +1,4 @@
-package com.yh.appbasic
+package com.yh.appbasic.ui
 
 import android.content.Context
 import android.os.Bundle
@@ -6,8 +6,8 @@ import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
-import com.yh.appbasic.ext.isCurrentLooper
-import com.yh.appbasic.ext.memoryId
+import android.os.isCurrentLooper
+import com.kotlin.memoryId
 
 abstract class ViewBindingActivity<VB : ViewBinding> : AppCompatActivity() {
     

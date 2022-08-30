@@ -28,6 +28,7 @@ object AppDependencies {
         const val viewbinding = "androidx.databinding:viewbinding:4.2.1"
         const val livedata = "androidx.lifecycle:lifecycle-livedata-ktx:2.3.1"
         const val viewmodel = "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1"
+        const val localbroadcast = "androidx.localbroadcastmanager:localbroadcastmanager:1.0.0"
     }
     
     object google {

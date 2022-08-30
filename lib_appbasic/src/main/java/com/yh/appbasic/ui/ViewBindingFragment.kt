@@ -1,4 +1,4 @@
-package com.yh.appbasic
+package com.yh.appbasic.ui
 
 import android.content.Context
 import android.os.Bundle
@@ -10,8 +10,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewbinding.ViewBinding
-import com.yh.appbasic.ext.isCurrentLooper
-import com.yh.appbasic.ext.memoryId
+import android.os.isCurrentLooper
+import com.kotlin.memoryId
 
 abstract class ViewBindingFragment<VB : ViewBinding> : Fragment() {
     

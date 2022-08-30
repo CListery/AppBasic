@@ -9,7 +9,8 @@ import android.os.Build
 import android.os.Environment
 import android.os.FileUtils
 import android.provider.MediaStore
-import com.yh.appbasic.ext.formatDate
+import com.kotlin.timeCurMillisecond
+import com.kotlin.timeFormatDate
 import com.yh.appbasic.logger.logE
 import com.yh.appbasic.logger.logW
 import java.io.*
@@ -23,8 +24,7 @@ import kotlin.random.Random
 object FileUtils {
     
     @JvmStatic
-    @Suppress("SpellCheckingInspection")
-    private val LASTING_DIR_NAME = "FangStar"
+    var LASTING_DIR_NAME = "FangStar"
     
     @JvmStatic
     private val FILE_SPLIT = File.separator
@@ -93,14 +93,15 @@ object FileUtils {
      * @return [mLastingDir]
      */
     @JvmStatic
-    val Context.lastingDir get(): File {
-        ensureLastingDir(this)
-        return mLastingDir.apply {
-            if (!exists()) {
-                mkdirs()
+    val Context.lastingDir
+        get(): File {
+            ensureLastingDir(this)
+            return mLastingDir.apply {
+                if (!exists()) {
+                    mkdirs()
+                }
             }
         }
-    }
     
     /**
      * 获取持久目录子目录
@@ -123,7 +124,8 @@ object FileUtils {
      * /data/data/{package}/files
      */
     @JvmStatic
-    val Context.internalDir get():File = filesDir
+    val Context.internalDir
+        get():File = filesDir
     
     /**
      * 获取应用内部目录
@@ -194,8 +196,24 @@ object FileUtils {
      * 创建缓存文件
      */
     @JvmStatic
+    fun Context.createCacheFile(dir: String, fileName: String): File {
+        return File(getCacheSubDirByName(dir), fileName)
+    }
+    
+    /**
+     * 创建缓存文件
+     */
+    @JvmStatic
     fun Context.createCacheFileByType(dir: String, fileType: MimeType): File {
         return createCacheFile(dir, fileType.prefix, fileType.extensions.toTypedArray().first())
+    }
+    
+    /**
+     * 创建缓存文件
+     */
+    @JvmStatic
+    fun Context.createCacheFileByName(dir: String, fileName: String): File {
+        return File(getCacheSubDirByName(dir), fileName)
     }
     
     /**
@@ -230,7 +248,7 @@ object FileUtils {
     fun Context.insertImage(
         file: File,
         name: String = file.name,
-        bucketName: String = getString(applicationInfo.labelRes)
+        bucketName: String = getString(applicationInfo.labelRes),
     ) {
         val contentValues = ContentValues()
         contentValues.put(MediaStore.Images.Media.TITLE, file.name)
@@ -274,13 +292,11 @@ object FileUtils {
      */
     @JvmStatic
     private fun generateFileName(prefix: String, suffix: String): String {
-        return String.format(
-            "%s_%s_%s.%s",
+        return listOf(
             prefix,
-            formatDate(System.currentTimeMillis(), "yyyyMMdd_HHmmss"),
+            timeCurMillisecond.timeFormatDate("yyyyMMdd_HHmmss"),
             RandomNumberGeneratorHolder.safeInt().toString(),
-            suffix
-        )
+        ).joinToString("_").plus(".$suffix")
     }
     
     /**
@@ -337,7 +353,7 @@ object FileUtils {
                 }
             }
         } catch (e: Exception) {
-            logE(e)
+            logE(throwable = e)
         }
         return false
     }
@@ -382,48 +398,54 @@ object FileUtils {
     }
     
     @JvmStatic
-    fun deleteAll(file: File?) {
+    @JvmOverloads
+    fun deleteAll(file: File?, withOutFilter: ((File) -> Boolean)? = null) {
         if (null == file) {
             return
         }
         if (!file.exists()) {
             return
         }
-        if (file.isFile) {
-            file.delete()
+        if (true == withOutFilter?.invoke(file)) {
             return
         }
-        DeleteFile(file)
-    }
-    
-    private class DeleteFile(file: File) {
-        init {
-            deleteContentsAndDir(file)
-        }
-        
-        private fun internalDeleteAll(file: File) {
-            val files = file.listFiles()
-            if (!files.isNullOrEmpty()) {
-                files.forEach { f ->
-                    if (f.isDirectory) {
-                        deleteContentsAndDir(f)
-                    } else {
-                        f.delete()
+        if (file.isFile) {
+            file.delete()
+        } else {
+            fun deleteRecursively(dir: File): Boolean {
+                val files = dir.listFiles()
+                var canDeleteDir = true
+                if (!files.isNullOrEmpty()) {
+                    files.forEach { f ->
+                        if (true == withOutFilter?.invoke(f)) {
+                            if (f.isDirectory) {
+                                // 跳过整个目录
+                                return false
+                            }
+                            canDeleteDir = false
+                            return@forEach
+                        }
+                        if (f.isFile) {
+                            f.delete()
+                        } else {
+                            canDeleteDir = deleteRecursively(f)
+                        }
                     }
                 }
+                if (canDeleteDir) {
+                    dir.delete()
+                }
+                return canDeleteDir
             }
-        }
-        
-        private fun deleteContentsAndDir(dir: File) {
-            internalDeleteAll(dir)
-            dir.delete()
+            deleteRecursively(file)
         }
     }
+    
     
     enum class MimeType(
         val prefix: String,
         val mimeTypeName: String,
-        val extensions: List<String>
+        val extensions: List<String>,
     ) {
         // ============== images ==============
         JPEG("IMG", "image/jpeg", listOf("jpg", "jpeg")),
@@ -441,7 +463,14 @@ object FileUtils {
         MKV("VID", "video/x-matroska", listOf("mkv")),
         WEBM("VID", "video/webm", listOf("webm")),
         TS("VID", "video/mp2ts", listOf("ts")),
-        AVI("VID", "video/avi", listOf("avi"));
+        AVI("VID", "video/avi", listOf("avi")),
+        
+        // =============== text ===============
+        PLAIN("TXT", "text/plain", listOf("txt", "text", "TXT", "TEXT")),
+        HTML("HTML", "text/html", listOf("html", "htm", "HTML", "HTM")),
+        LOG("LOG", "text/log", listOf("log")),
+        
+        ;
     }
     
 }
