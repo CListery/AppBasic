@@ -8,7 +8,7 @@ typealias FormatStrategyBuilder = (logTag: String) -> FormatStrategy
 open class LogOwner(val logTag: () -> String) : ILoggable {
     
     private var formatStrategyBuilder: FormatStrategyBuilder = {
-        TheLogFormatStrategy.newBuilder().setFirstTag(it).build()
+        TheLogFormatStrategy.newBuilder(it).build()
     }
     
     fun onCreateFormatStrategy(builder: FormatStrategyBuilder): LogOwner {

@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
  *
  * Created by CYH on 2020/5/15 09:53
  */
-class TheLogFormatStrategy private constructor(builder: Builder) : FormatStrategy {
+class TheLogFormatStrategy private constructor(private val builder: Builder) : FormatStrategy {
 
     companion object {
         /**
@@ -39,8 +39,8 @@ class TheLogFormatStrategy private constructor(builder: Builder) : FormatStrateg
         private const val MIDDLE_BORDER = "$MIDDLE_CORNER$SINGLE_DIVIDER$SINGLE_DIVIDER"
 
         @NonNull
-        fun newBuilder(): Builder {
-            return Builder()
+        fun newBuilder(firstTag: String): Builder {
+            return Builder(firstTag)
         }
     }
 
@@ -49,15 +49,12 @@ class TheLogFormatStrategy private constructor(builder: Builder) : FormatStrateg
     private var showThreadInfo = false
     @NonNull
     private var logStrategy: LogStrategy
-    @Nullable
-    private var firstTag: String
 
     init {
         methodCount = builder.getMethodCount()
         stackFilterClassNames = builder.getStackFilter()
         showThreadInfo = builder.isShowThreadInfo()
         logStrategy = builder.getLogStrategy()
-        firstTag = builder.getFirstTag()
     }
 
     override fun log(priority: Int, @Nullable onceOnlyTag: String?, @NonNull message: String) {
@@ -160,10 +157,10 @@ class TheLogFormatStrategy private constructor(builder: Builder) : FormatStrateg
 
     @Nullable
     private fun formatTag(@Nullable onceOnlyTag: String?): String {
-        return if (!onceOnlyTag.isNullOrEmpty() && firstTag != onceOnlyTag) {
-            "${firstTag}-${onceOnlyTag}"
+        return if (!onceOnlyTag.isNullOrEmpty() && builder.firstTag != onceOnlyTag) {
+            "${builder.firstTag}-${onceOnlyTag}"
         } else {
-            firstTag
+            builder.firstTag
         }
     }
     
@@ -171,7 +168,7 @@ class TheLogFormatStrategy private constructor(builder: Builder) : FormatStrateg
         logStrategy.release()
     }
     
-    class Builder {
+    class Builder(val firstTag: String) {
         /**
          * 日志跟踪行数
          */
@@ -185,11 +182,7 @@ class TheLogFormatStrategy private constructor(builder: Builder) : FormatStrateg
          */
         @Nullable
         private var logStrategy: LogStrategy = LogcatLogStrategy()
-        /**
-         * 默认日志标签
-         */
-        @Nullable
-        private var firstTag = "|"
+        
         /**
          * 不输出到日志中的类
          */
@@ -258,24 +251,6 @@ class TheLogFormatStrategy private constructor(builder: Builder) : FormatStrateg
         @NonNull
         fun setLogStrategy(@NonNull strategy: LogStrategy): Builder {
             logStrategy = strategy
-            return this
-        }
-
-        /**
-         * 获取默认日志标签
-         */
-        fun getFirstTag() = firstTag
-
-        /**
-         * 设置默认日志标签
-         * @param [tag] 日志标签
-         */
-        @NonNull
-        fun setFirstTag(@Nullable tag: String?): Builder {
-            if (null == tag) {
-                return this
-            }
-            this.firstTag = tag
             return this
         }
 

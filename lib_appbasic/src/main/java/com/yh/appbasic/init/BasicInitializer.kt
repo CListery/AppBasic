@@ -15,13 +15,6 @@ import com.yh.appbasic.logger.LogOwner
 import com.yh.appbasic.logger.logW
 import com.yh.appbasic.logger.owner.LibLogger
 
-//open class Share<I : BasicInitializer>(@JvmField val instance: I) {
-//    @Suppress("UNCHECKED_CAST")
-//    fun <I : BasicInitializer> get(): I = instance as I
-//}
-
-//inline fun <reified T : BasicInitializer> (): T? = Initializer.get(T::class.java)
-
 open class BasicInitializer : ContentProvider(), ILoggable {
     
     /**

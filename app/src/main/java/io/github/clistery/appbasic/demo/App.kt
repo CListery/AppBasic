@@ -41,11 +41,11 @@ class App : Application() {
 //        LibLogger.onCreateFormatStrategy { logFormatStrategy }
         
         AppLogger.onCreateFormatStrategy {
-            TheLogFormatStrategy.newBuilder().setFirstTag("APP").setMethodCount(5)
+            TheLogFormatStrategy.newBuilder("APP").setMethodCount(5)
                 .setStackFilter(B::class).build()
         }.on()
         LibLogger.onCreateFormatStrategy {
-            TheLogFormatStrategy.newBuilder().setFirstTag("Library").setMethodCount(5).build()
+            TheLogFormatStrategy.newBuilder("Library").setMethodCount(5).build()
         }.on()
 
 //        AppLogger.on()
@@ -55,8 +55,7 @@ class App : Application() {
         LogsManager.cleanup(this)
         
         AppBasicShare.get<LibApp>()?.logger?.onCreateFormatStrategy {
-            TheLogFormatStrategy.newBuilder()
-                .setFirstTag(it)
+            TheLogFormatStrategy.newBuilder(it)
 //                .setShowThreadInfo(false)
                 .setMethodCount(0)
 //                .setMethodCount(5)
