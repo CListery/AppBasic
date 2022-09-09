@@ -16,7 +16,7 @@ import io.github.clistery.appbasic.demo.server.TimerIntentServer
 import io.github.clistery.appbasic.demo.server.TimerJobServer
 import kotlin.random.Random
 
-class MainAct : ViewBindingActivity<ActMainBinding>(), ILoggable {
+class MainAct : ViewBindingActivity<ActMainBinding>() {
     
     override fun binderCreator(savedInstanceState: Bundle?): ActMainBinding =
         ActMainBinding.inflate(layoutInflater)

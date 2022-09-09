@@ -1,14 +1,13 @@
 package com.yh.libapp;
 
-import com.yh.appbasic.init.AppBasicShare;
+import com.yh.appbasic.initializer.AppBasicShare;
 import com.yh.appbasic.logger.ILoggable;
 import com.yh.appbasic.logger.Logs;
 
 public class B implements ILoggable {
 
     static {
-        LibApp libApp = AppBasicShare.get(LibApp.class);
-        Logs.logD("B static: " + (null == libApp ? null : libApp.getAppContext()), libApp);
+        Logs.logD("B static: " + AppBasicShare.getContext(), LibApp.INSTANCE);
     }
 
     public B() {

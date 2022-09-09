@@ -1,15 +1,6 @@
 package com.yh.libapp
 
-import android.content.Context
-import com.yh.appbasic.init.BasicInitializer
+import com.yh.appbasic.logger.ILibLogger
+import com.yh.appbasic.logger.LogOwner
 
-class LibApp : BasicInitializer() {
-    override fun initializer(context: Context) {
-//        logger.onCreateFormatStrategy {
-//            TheLogFormatStrategy.newBuilder()
-//                .setFirstTag(it)
-//                .setMethodCount(5)
-//                .build()
-//        }
-    }
-}
+object LibApp : ILibLogger

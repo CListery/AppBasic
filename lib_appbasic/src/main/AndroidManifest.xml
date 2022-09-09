@@ -4,7 +4,7 @@
 
     <application>
         <provider
-            android:name=".init.BasicInitializer"
+            android:name=".initializer.BasicInitializer"
             android:authorities="${applicationId}.BasicInitializer.Init"
             android:enabled="true"
             android:exported="false"/>

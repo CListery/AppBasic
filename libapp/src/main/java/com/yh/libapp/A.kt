@@ -1,6 +1,6 @@
 package com.yh.libapp
 
-import com.yh.appbasic.init.AppBasicShare
+import com.yh.appbasic.initializer.AppBasicShare
 import com.yh.appbasic.logger.ILoggable
 import com.yh.appbasic.logger.logD
 import com.yh.appbasic.logger.logW
@@ -11,11 +11,10 @@ import com.yh.appbasic.logger.logW
 class A : ILoggable {
     
     init {
-        val libApp = AppBasicShare.get<LibApp>()
-        logW("A static: ${libApp?.appContext}", libApp)
+        logW("A static: ${AppBasicShare.context}", LibApp)
     }
     
-    constructor(){
+    constructor() {
         logD("A init", this)
     }
     

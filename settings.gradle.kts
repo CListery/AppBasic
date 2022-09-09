@@ -1,4 +1,4 @@
-include(":app")
-include(":lib_appbasic")
 rootProject.name = "AppBasic"
+include(":lib_appbasic")
 include(":libapp")
+include(":app")

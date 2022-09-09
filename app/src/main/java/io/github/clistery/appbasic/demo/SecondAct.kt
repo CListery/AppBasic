@@ -8,15 +8,16 @@ import android.provider.Settings
 import android.view.WindowManager
 import android.view.onClick
 import androidx.appcompat.app.AlertDialog
-import com.yh.appbasic.logger.ILoggable
 import com.yh.appbasic.logger.logD
+import com.yh.appbasic.logger.owner.AppLogger
+import com.yh.appbasic.logger.owner.LibLogger
 import com.yh.appbasic.ui.ViewBindingActivity
 import com.yh.libapp.A
 import com.yh.libapp.B
 import io.github.clistery.appbasic.demo.databinding.ActSecBinding
 import io.github.clistery.appbasic.demo.ext.listenKill
 
-class SecondAct : ViewBindingActivity<ActSecBinding>(), ILoggable {
+class SecondAct : ViewBindingActivity<ActSecBinding>() {
     override fun binderCreator(savedInstanceState: Bundle?): ActSecBinding =
         ActSecBinding.inflate(layoutInflater)
     
@@ -66,10 +67,8 @@ class SecondAct : ViewBindingActivity<ActSecBinding>(), ILoggable {
     }
     
     override fun onDestroy() {
-//        LogsManager.setDefLoggerConfig(
-//            libConfig = Pair(true, Log.VERBOSE),
-//            appConfig = Pair(false, Log.VERBOSE)
-//        )
+        LibLogger.on()
+        AppLogger.off()
         
         super.onDestroy()
     }

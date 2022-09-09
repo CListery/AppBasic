@@ -2,12 +2,11 @@ package io.github.clistery.appbasic.demo
 
 import android.app.Application
 import android.content.Intent
-import android.os.Process
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import android.content.killAllOtherProcess
 import android.content.killProcessExceptMain
 import android.content.listenScreenOff
-import com.yh.appbasic.init.AppBasicShare
+import android.os.Process
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.yh.appbasic.logger.LogsManager
 import com.yh.appbasic.logger.impl.TheLogFormatStrategy
 import com.yh.appbasic.logger.logI
@@ -54,7 +53,7 @@ class App : Application() {
         LogsManager.diskLogKeepDay(3)
         LogsManager.cleanup(this)
         
-        AppBasicShare.get<LibApp>()?.logger?.onCreateFormatStrategy {
+        LibApp.logger.onCreateFormatStrategy {
             TheLogFormatStrategy.newBuilder(it)
 //                .setShowThreadInfo(false)
                 .setMethodCount(0)

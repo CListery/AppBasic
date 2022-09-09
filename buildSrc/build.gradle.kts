@@ -2,11 +2,18 @@ plugins {
     `kotlin-dsl`
 }
 
-gradlePlugin {
-    plugins {
-        create("clistery_plugin") {
-            id = "com.clistery.gradle"
-            implementationClass = "com.clistery.src.CPlugin"
-        }
-    }
+repositories {
+    mavenCentral()
+    google()
+    gradlePluginPortal()
+}
+
+dependencies {
+    implementation(gradleApi())
+    implementation(gradleKotlinDsl())
+    implementation(Dependencies.GradlePlugin.android)
+    implementation(Dependencies.GradlePlugin.kotlin)
+    implementation(Dependencies.GradlePlugin.androidKotlin)
+    implementation(Dependencies.GradlePlugin.jfrog)
+    implementation(Dependencies.GradlePlugin.dokka)
 }
