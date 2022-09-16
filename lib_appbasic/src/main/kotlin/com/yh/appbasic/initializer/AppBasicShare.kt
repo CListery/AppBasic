@@ -7,12 +7,11 @@ import android.os.Looper
 import android.os.Process
 import com.kotlin.isInitialized
 import com.kotlin.memoryId
-import com.yh.appbasic.logger.ILibLogger
 import com.yh.appbasic.logger.logW
 import com.yh.appbasic.logger.owner.LibLogger
 
 @Suppress("unused")
-object AppBasicShare : ILibLogger {
+object AppBasicShare {
     /**
      * 当前PID
      */

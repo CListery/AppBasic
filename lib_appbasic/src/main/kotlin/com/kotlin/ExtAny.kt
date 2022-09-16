@@ -19,7 +19,7 @@ val Any?.memoryId get() = System.identityHashCode(this).toString(16)
  * @param stringArray 对象数组
  */
 fun getAppendStr(vararg stringArray: Any?) = getAppendStr(
-    appendColon = true, stringArray = *stringArray
+    appendColon = true, stringArray = stringArray
 )
 
 /**
@@ -30,7 +30,7 @@ fun getAppendStr(vararg stringArray: Any?) = getAppendStr(
  * @param stringArray 对象数组
  */
 fun getAppendStr(appendColon: Boolean, vararg stringArray: Any?) = getAppendStr(
-    separator = ": ", appendColon = appendColon, stringArray = *stringArray
+    separator = ": ", appendColon = appendColon, stringArray = stringArray
 )
 
 /**

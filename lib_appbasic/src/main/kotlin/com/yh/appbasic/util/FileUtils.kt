@@ -47,6 +47,7 @@ object FileUtils {
     
     @JvmStatic
     private fun ensureLastingDir(context: Context) {
+        @Suppress("DEPRECATION")
         var parentDir = Environment.getExternalStorageDirectory()
         if (null == parentDir) {
             // /sdcard
@@ -54,6 +55,7 @@ object FileUtils {
         }
         if (!parentDir.canWrite()) {
             // /sdcard/Download
+            @Suppress("DEPRECATION")
             parentDir =
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         }
@@ -254,6 +256,7 @@ object FileUtils {
         contentValues.put(MediaStore.Images.Media.TITLE, file.name)
         contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
         contentValues.put(MediaStore.Images.Media.BUCKET_DISPLAY_NAME, bucketName)
+        @Suppress("DEPRECATION")
         contentValues.put(MediaStore.Images.Media.DATA, file.absolutePath)
         contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, name)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -265,6 +268,7 @@ object FileUtils {
             contentValues
         )
         if (null != uri) {
+            @Suppress("DEPRECATION")
             sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri))
         }
     }

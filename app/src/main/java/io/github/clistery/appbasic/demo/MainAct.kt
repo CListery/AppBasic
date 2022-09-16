@@ -7,7 +7,9 @@ import android.util.Log
 import android.view.onClick
 import com.yh.appbasic.logger.*
 import com.yh.appbasic.logger.impl.DiskLogFormatStrategy
+import com.yh.appbasic.logger.impl.TheLogFormatStrategy
 import com.yh.appbasic.ui.ViewBindingActivity
+import com.yh.libapp.LibApp
 import io.github.clistery.appbasic.demo.databinding.ActMainBinding
 import io.github.clistery.appbasic.demo.ext.listenKill
 import io.github.clistery.appbasic.demo.server.CrashJobServer
@@ -91,6 +93,14 @@ class MainAct : ViewBindingActivity<ActMainBinding>() {
         }
         btnCleanUpLogs.onClick {
             LogsManager.cleanup(mCtx, false)
+        }
+        btnChangeLibAppLogger.onClick {
+            LibApp.logOwner.onCreateFormatStrategy {
+                TheLogFormatStrategy.newBuilder(it)
+                    .setShowThreadInfo(false)
+                    .setMethodCount(0)
+                    .build()
+            }
         }
     }
     

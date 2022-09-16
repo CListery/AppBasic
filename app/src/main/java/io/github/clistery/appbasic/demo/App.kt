@@ -1,23 +1,22 @@
 package io.github.clistery.appbasic.demo
 
-import android.app.Application
 import android.content.Intent
 import android.content.killAllOtherProcess
 import android.content.killProcessExceptMain
 import android.content.listenScreenOff
 import android.os.Process
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.multidex.MultiDexApplication
 import com.yh.appbasic.logger.LogsManager
 import com.yh.appbasic.logger.impl.TheLogFormatStrategy
 import com.yh.appbasic.logger.logI
 import com.yh.appbasic.logger.owner.AppLogger
 import com.yh.appbasic.logger.owner.LibLogger
 import com.yh.libapp.B
-import com.yh.libapp.LibApp
 import io.github.clistery.appbasic.demo.ext.ACTION_KILL_ACT
 import kotlin.system.exitProcess
 
-class App : Application() {
+class App : MultiDexApplication() {
     
     companion object {
         @JvmStatic
@@ -52,14 +51,6 @@ class App : Application() {
         
         LogsManager.diskLogKeepDay(3)
         LogsManager.cleanup(this)
-        
-        LibApp.logger.onCreateFormatStrategy {
-            TheLogFormatStrategy.newBuilder(it)
-//                .setShowThreadInfo(false)
-                .setMethodCount(0)
-//                .setMethodCount(5)
-                .build()
-        }
     }
     
     fun kill(force: Boolean = false) {

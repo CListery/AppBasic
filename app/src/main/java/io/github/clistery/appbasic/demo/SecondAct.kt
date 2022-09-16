@@ -67,8 +67,8 @@ class SecondAct : ViewBindingActivity<ActSecBinding>() {
     }
     
     override fun onDestroy() {
-        LibLogger.on()
-        AppLogger.off()
+//        LibLogger.on()
+//        AppLogger.off()
         
         super.onDestroy()
     }

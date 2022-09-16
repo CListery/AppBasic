@@ -46,6 +46,12 @@ object LogsManager {
     }
     
     /**
+     * 保存实现了 ILogger 的 LogOwner 对象
+     * @see ILogger
+     */
+    private val loggers = hashMapOf<String, LogOwner>()
+    
+    /**
      * 日志文件保留的最大时间，单位天
      */
     @JvmStatic
@@ -61,6 +67,23 @@ object LogsManager {
     }
     
     /**
+     * 查找 [logger] 绑定的 [LogOwner]
+     *
+     * 如果没有则自动创建
+     *
+     * @see [ILogger.onCreateLogOwner]
+     */
+    @JvmStatic
+    fun findLogOwner(logger: ILogger): LogOwner {
+        val printerProviderName = logger::class.simpleName!!
+        return loggers.getOrPut(printerProviderName) {
+            LogOwner { printerProviderName }.also {
+                logger.onCreateLogOwner(it)
+            }
+        }
+    }
+    
+    /**
      * 根据 [LogOwner] 获取 [Printer]
      *
      * @return [Printer]
@@ -68,14 +91,13 @@ object LogsManager {
      */
     @JvmStatic
     internal fun switchPrinter(printerProvider: Any?): Printer {
-        val tag = printerProvider?.javaClass?.simpleName
         return when (printerProvider) {
-            is ILoggable -> switchPrinter(AppLogger.logAdapter).t(tag)
-            is ILibLogger -> switchPrinter(printerProvider.logger).t(tag)
-            is LogsManager -> switchPrinter(LibLogger).t(tag)
+            is LogsManager -> switchPrinter(LibLogger).t("LogsMgr")
+            is AppBasicShare -> switchPrinter(LibLogger).t("AppBasic")
             is LogOwner -> switchPrinter(printerProvider.logAdapter).t(printerProvider.logTag())
             is LogAdapter -> printer.adapter(printerProvider)
-            else -> switchPrinter(AppLogger.logAdapter).t(AppLogger.logTag())
+            is ILogger -> switchPrinter(findLogOwner(printerProvider))
+            else -> switchPrinter(AppLogger).t(printerProvider?.let { it::class.simpleName })
         }
     }
     

@@ -17,6 +17,7 @@ import com.yh.appbasic.logger.owner.AppLogger
  *
  * @return true，当前处于主进程
  */
+@Suppress("DEPRECATION")
 fun Context.isMainProcess(): Boolean {
     try {
         val am: ActivityManager? = getSystemService()

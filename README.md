@@ -1,3 +1,5 @@
+[![Build Status](https://github.com/erikc5000/island-time/workflows/Publish/badge.svg)](https://github.com/clistery/appbasic/actions?query=workflow%3APublish) [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.clistery/appbasic/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.clistery/appbasic)
+
 # AppBasic
 
 基本框架，提供一些功能扩展和实用工具
@@ -5,7 +7,7 @@
 ## Use
 
 ```gradle
-implementation("io.github.clistery:appbasic:2.1.0")
+implementation("io.github.clistery:appbasic:2.2.0")
 ```
 
 ## 全局共享
@@ -19,21 +21,37 @@ implementation("io.github.clistery:appbasic:2.1.0")
 
 ## 日志功能
 
-- ILoggable
-  - 实现该接口后输出日志会自动带上该接口实现类的名称作为子TAG
+- ILogger `实现该接口则会自动创建一个 LogOwner`
+  
+  - kotlin
   
   ```kotlin
-  class A : ILoggable {
+  class A : ILogger{
       constructor() {
           logD("A init", this)
-      }   
+      }
+      override fun onCreateLogOwner(logOwner: LogOwner) {
+          // 可以在此做一些自定义配置
+          logOwner.onCreateFormatStrategy {
+              TheLogFormatStrategy.newBuilder("AAA")
+                  .setShowThreadInfo(false)
+                  .setMethodCount(0)
+                  .build()
+          }
+      }
   }
   ```
   
+  - java
+
   ```java
-  public class B implements ILoggable {
+  public class B implements ILogger {
       public B() {
           Logs.logD("B init", this);
+      }
+
+      @Override
+      public void onCreateLogOwner(@NonNull LogOwner logOwner) {
       }
   }
   ```
@@ -43,8 +61,8 @@ implementation("io.github.clistery:appbasic:2.1.0")
   - cleanup - 按规则清理日志文件
 
 - 默认配置
-  - AppLogger - 默认的 APP Logger，所有直接调用 logD\logW\logE... 不指定 loggable 的方式，都会默认使用该 Logger
-  - LibLogger - 默认的 Library Logger，一般用于库中打印日志，使用时需要指定
+  - AppLogger - 默认的 APP Logger ，所有直接调用 logD\logW\logE... 不指定 loggable 的方式，都会默认使用该 LogOwner
+  - LibLogger - 默认的 Library LogOwner ，一般用于库中打印日志，使用时需要指定
 - 使用文件输出日志
 
   ```kotlin
@@ -53,6 +71,7 @@ implementation("io.github.clistery:appbasic:2.1.0")
   ```
 
 - 修改默认配置
+  - kotlin
 
   ```kotlin
   AppLogger.onCreateFormatStrategy {
@@ -64,16 +83,33 @@ implementation("io.github.clistery:appbasic:2.1.0")
   }.on()
   ```
 
-- 日志输出
+  - java
 
+  ```java
+  AppLogger.INSTANCE.onCreateFormatStrategy(tag -> {
+      TheLogFormatStrategy.newBuilder("APP")
+              .setMethodCount(5)
+              .setStackFilter(B.class)
+              .build();
+      return null;
+  });
+  ```
+
+- 日志输出
+  - kotlin
+  
   ```kotlin
   logW("A static: ${libApp?.appContext}", libApp) // 指定loggable
   logD("A init") // 使用默认的 AppLogger
+  logD("A init", this) // 使用当前类名作为 logtag
   ```
+
+  - java
   
   ```java
   Logs.logD("B static: " + (null == libApp ? null : libApp.getAppContext()), libApp); // 指定loggable
   Logs.logD("B init"); // 使用默认的 AppLogger
+  Logs.logD("B init", this); // 使用当前类名作为 logtag
   ```
 
 - 更多关于日志打印功能请参阅

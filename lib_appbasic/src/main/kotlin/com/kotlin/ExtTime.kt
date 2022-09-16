@@ -54,6 +54,7 @@ enum class TimeDayOnWeek(
     ;
     
     companion object {
+        @JvmStatic
         fun week(calendar: Calendar): String =
             values().getOrElse(calendar.get(Calendar.DAY_OF_WEEK)) { UNKNOWN }.weekName
     }

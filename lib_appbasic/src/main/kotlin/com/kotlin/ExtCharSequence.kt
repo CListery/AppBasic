@@ -3,12 +3,12 @@
 
 package com.kotlin
 
-inline fun String.Companion.safeFormat(format: String, vararg args: Any?): String {
+fun String.Companion.safeFormat(format: String, vararg args: Any?): String {
     val safeArgs = args.map { it.safeGet { "" } }.toTypedArray()
     return String.format(format, *safeArgs)
 }
 
-inline fun <T : CharSequence> Array<out T?>.filterNotEmpty(): List<T> {
+fun <T : CharSequence> Array<out T?>.filterNotEmpty(): List<T> {
     return filterNotNull().filterNotTo(arrayListOf()) { it.isEmpty() }
 }
 

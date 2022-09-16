@@ -60,6 +60,14 @@
             android:layout_centerHorizontal="true"
             android:text="CleanUp Logs" />
 
+        <Button
+            android:id="@+id/btnChangeLibAppLogger"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:text="Change libapp logger" />
+
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

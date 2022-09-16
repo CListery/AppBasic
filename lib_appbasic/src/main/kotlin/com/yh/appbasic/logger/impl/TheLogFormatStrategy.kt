@@ -3,7 +3,6 @@ package com.yh.appbasic.logger.impl
 import android.os.Process
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
-import com.yh.appbasic.BuildConfig
 import com.yh.appbasic.logger.FormatStrategy
 import com.yh.appbasic.logger.LogStrategy
 import kotlin.math.min
@@ -38,6 +37,7 @@ class TheLogFormatStrategy private constructor(private val builder: Builder) : F
         private const val BOTTOM_BORDER = "$BOTTOM_LEFT_CORNER$DOUBLE_DIVIDER$DOUBLE_DIVIDER"
         private const val MIDDLE_BORDER = "$MIDDLE_CORNER$SINGLE_DIVIDER$SINGLE_DIVIDER"
 
+        @JvmStatic
         @NonNull
         fun newBuilder(firstTag: String): Builder {
             return Builder(firstTag)
@@ -172,7 +172,7 @@ class TheLogFormatStrategy private constructor(private val builder: Builder) : F
         /**
          * 日志跟踪行数
          */
-        private var methodCount = BuildConfig.LOG_METHOD_COUNT
+        private var methodCount = 2
         /**
          * 是否显示线程信息
          */
