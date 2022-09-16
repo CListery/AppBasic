@@ -149,3 +149,8 @@ signing {
 tasks.withType<Sign>().configureEach {
     onlyIf { isReleaseVersion }
 }
+
+tasks.register<org.jetbrains.dokka.gradle.DokkaTask>("dokkaDocs") {
+    dependsOn(tasks.dokkaJekyll)
+    outputDirectory.set(file("$rootDir/docs/api"))
+}

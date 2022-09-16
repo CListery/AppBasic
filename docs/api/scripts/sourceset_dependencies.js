@@ -1,0 +1,1 @@
+sourceset_dependencies='{":lib_appbasic:dokkaDocs/androidTestRelease":[],":lib_appbasic:dokkaDocs/debug":[],":lib_appbasic:dokkaDocs/main":[],":lib_appbasic:dokkaDocs/release":[],":lib_appbasic:dokkaDocs/testFixtures":[],":lib_appbasic:dokkaDocs/testFixturesDebug":[],":lib_appbasic:dokkaDocs/testFixturesRelease":[]}'
