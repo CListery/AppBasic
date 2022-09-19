@@ -152,5 +152,5 @@ tasks.withType<Sign>().configureEach {
 
 tasks.register<org.jetbrains.dokka.gradle.DokkaTask>("dokkaDocs") {
     dependsOn(tasks.dokkaJekyll)
-    outputDirectory.set(file("$rootDir/docs/api"))
+    outputDirectory.set(file("$rootDir/docs"))
 }
