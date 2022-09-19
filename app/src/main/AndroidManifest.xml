@@ -22,6 +22,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".SecondAct" />
+        <activity
+            android:name=".ThirdAct"
+            android:process=":third" />
         <service
             android:name=".server.MySafeJobServer"
             android:exported="true"

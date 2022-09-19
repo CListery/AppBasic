@@ -35,6 +35,9 @@ class SecondAct : ViewBindingActivity<ActSecBinding>() {
         fab.onClick {
             showAlert()
         }
+        btnEndCall.onClick {
+            startActivity(Intent(mCtx, ThirdAct::class.java))
+        }
     }
     
     private fun showAlert() {

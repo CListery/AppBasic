@@ -1,4 +1,4 @@
-[![Build Status](https://github.com/erikc5000/island-time/workflows/Publish/badge.svg)](https://github.com/clistery/appbasic/actions?query=workflow%3APublish) [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.clistery/appbasic/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.clistery/appbasic)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.clistery/appbasic/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.clistery/appbasic)
 
 # AppBasic
 
@@ -7,12 +7,13 @@
 ## Use
 
 ```gradle
-implementation("io.github.clistery:appbasic:2.2.0")
+implementation("io.github.clistery:appbasic:2.3.0")
 ```
 
 ## 全局共享
 
 - AppBasicShare
+  - install - 在 Application 中调用该函数实现共享 Context
   - pid - 当前主进程id
   - application - Application
   - context - Context

@@ -1,4 +1,4 @@
-package com.yh.appbasic.initializer
+package com.yh.appbasic.share
 
 import android.app.Application
 import android.content.Context
@@ -7,6 +7,7 @@ import android.os.Looper
 import android.os.Process
 import com.kotlin.isInitialized
 import com.kotlin.memoryId
+import com.yh.appbasic.logger.logD
 import com.yh.appbasic.logger.logW
 import com.yh.appbasic.logger.owner.LibLogger
 
@@ -39,9 +40,10 @@ object AppBasicShare {
         get() = innerAppContext!!
     
     @JvmStatic
-    internal fun install(basicInitializer: BasicInitializer) {
+    fun install(context: Context) {
         pid = Process.myPid()
-        innerAppContext = basicInitializer.context?.applicationContext as Application?
+        innerAppContext = context.applicationContext as Application?
+        logD("$pid", this)
     }
     
     @JvmStatic

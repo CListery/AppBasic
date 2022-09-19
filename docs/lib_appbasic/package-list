@@ -93,16 +93,6 @@ $dokka.location:com.kotlin/TimeDayOnWeek.WEDNESDAY///PointingToDeclaration/{"org
 $dokka.location:com.kotlin/TimeDayOnWeek///PointingToDeclaration/lib_appbasic/com.kotlin/-time-day-on-week/index.html
 $dokka.location:com.kotlin/TimeDayOnWeek/dayOfWeek/#/PointingToDeclaration/lib_appbasic/com.kotlin/-time-day-on-week/day-of-week.html
 $dokka.location:com.kotlin/TimeDayOnWeek/weekName/#/PointingToDeclaration/lib_appbasic/com.kotlin/-time-day-on-week/week-name.html
-$dokka.location:com.yh.appbasic.initializer////PointingToDeclaration/lib_appbasic/com.yh.appbasic.initializer/index.html
-$dokka.location:com.yh.appbasic.initializer/AppBasicShare///PointingToDeclaration/lib_appbasic/com.yh.appbasic.initializer/-app-basic-share/index.html
-$dokka.location:com.yh.appbasic.initializer/AppBasicShare/application/#/PointingToDeclaration/lib_appbasic/com.yh.appbasic.initializer/-app-basic-share/application.html
-$dokka.location:com.yh.appbasic.initializer/AppBasicShare/context/#/PointingToDeclaration/lib_appbasic/com.yh.appbasic.initializer/-app-basic-share/context.html
-$dokka.location:com.yh.appbasic.initializer/AppBasicShare/pid/#/PointingToDeclaration/lib_appbasic/com.yh.appbasic.initializer/-app-basic-share/pid.html
-$dokka.location:com.yh.appbasic.initializer/AppBasicShare/removeRunnable/#java.lang.Runnable/PointingToDeclaration/lib_appbasic/com.yh.appbasic.initializer/-app-basic-share/remove-runnable.html
-$dokka.location:com.yh.appbasic.initializer/AppBasicShare/runOnUiThread/#java.lang.Runnable#kotlin.Long/PointingToDeclaration/lib_appbasic/com.yh.appbasic.initializer/-app-basic-share/run-on-ui-thread.html
-$dokka.location:com.yh.appbasic.initializer/BasicInitializer///PointingToDeclaration/lib_appbasic/com.yh.appbasic.initializer/-basic-initializer/index.html
-$dokka.location:com.yh.appbasic.initializer/BasicInitializer/BasicInitializer/#/PointingToDeclaration/lib_appbasic/com.yh.appbasic.initializer/-basic-initializer/-basic-initializer.html
-$dokka.location:com.yh.appbasic.initializer/BasicInitializer/onCreate/#/PointingToDeclaration/lib_appbasic/com.yh.appbasic.initializer/-basic-initializer/on-create.html
 $dokka.location:com.yh.appbasic.logger.impl////PointingToDeclaration/lib_appbasic/com.yh.appbasic.logger.impl/index.html
 $dokka.location:com.yh.appbasic.logger.impl/DiskLogFormatStrategy.Builder///PointingToDeclaration/lib_appbasic/com.yh.appbasic.logger.impl/-disk-log-format-strategy/-builder/index.html
 $dokka.location:com.yh.appbasic.logger.impl/DiskLogFormatStrategy.Builder/Builder/#android.content.Context#kotlin.String/PointingToDeclaration/lib_appbasic/com.yh.appbasic.logger.impl/-disk-log-format-strategy/-builder/-builder.html
@@ -217,6 +207,14 @@ $dokka.location:com.yh.appbasic.logger/Printer/v/#kotlin.String?#kotlin.Array[ko
 $dokka.location:com.yh.appbasic.logger/Printer/w/#kotlin.String?#kotlin.Array[kotlin.Any?]/PointingToDeclaration/lib_appbasic/com.yh.appbasic.logger/-printer/w.html
 $dokka.location:com.yh.appbasic.logger/Printer/wtf/#kotlin.String?#kotlin.Array[kotlin.Any?]/PointingToDeclaration/lib_appbasic/com.yh.appbasic.logger/-printer/wtf.html
 $dokka.location:com.yh.appbasic.logger/Printer/xml/#kotlin.Any?/PointingToDeclaration/lib_appbasic/com.yh.appbasic.logger/-printer/xml.html
+$dokka.location:com.yh.appbasic.share////PointingToDeclaration/lib_appbasic/com.yh.appbasic.share/index.html
+$dokka.location:com.yh.appbasic.share/AppBasicShare///PointingToDeclaration/lib_appbasic/com.yh.appbasic.share/-app-basic-share/index.html
+$dokka.location:com.yh.appbasic.share/AppBasicShare/application/#/PointingToDeclaration/lib_appbasic/com.yh.appbasic.share/-app-basic-share/application.html
+$dokka.location:com.yh.appbasic.share/AppBasicShare/context/#/PointingToDeclaration/lib_appbasic/com.yh.appbasic.share/-app-basic-share/context.html
+$dokka.location:com.yh.appbasic.share/AppBasicShare/install/#android.content.Context/PointingToDeclaration/lib_appbasic/com.yh.appbasic.share/-app-basic-share/install.html
+$dokka.location:com.yh.appbasic.share/AppBasicShare/pid/#/PointingToDeclaration/lib_appbasic/com.yh.appbasic.share/-app-basic-share/pid.html
+$dokka.location:com.yh.appbasic.share/AppBasicShare/removeRunnable/#java.lang.Runnable/PointingToDeclaration/lib_appbasic/com.yh.appbasic.share/-app-basic-share/remove-runnable.html
+$dokka.location:com.yh.appbasic.share/AppBasicShare/runOnUiThread/#java.lang.Runnable#kotlin.Long/PointingToDeclaration/lib_appbasic/com.yh.appbasic.share/-app-basic-share/run-on-ui-thread.html
 $dokka.location:com.yh.appbasic.ui////PointingToDeclaration/lib_appbasic/com.yh.appbasic.ui/index.html
 $dokka.location:com.yh.appbasic.ui/ViewBindingActivity///PointingToDeclaration/lib_appbasic/com.yh.appbasic.ui/-view-binding-activity/index.html
 $dokka.location:com.yh.appbasic.ui/ViewBindingActivity/ViewBindingActivity/#/PointingToDeclaration/lib_appbasic/com.yh.appbasic.ui/-view-binding-activity/-view-binding-activity.html
@@ -319,10 +317,10 @@ android.os
 android.view
 androidx.core.app
 com.kotlin
-com.yh.appbasic.initializer
 com.yh.appbasic.logger
 com.yh.appbasic.logger.impl
 com.yh.appbasic.logger.owner
+com.yh.appbasic.share
 com.yh.appbasic.ui
 com.yh.appbasic.util
 

@@ -8,7 +8,7 @@ import com.kotlin.differenceDay
 import com.kotlin.timeCurMillisecond
 import com.kotlin.timeFormatDate
 import com.kotlin.timeParseDate
-import com.yh.appbasic.initializer.AppBasicShare
+import com.yh.appbasic.share.AppBasicShare
 import com.yh.appbasic.logger.impl.DiskLogFormatStrategy
 import com.yh.appbasic.logger.impl.TheLogPrinter
 import com.yh.appbasic.logger.owner.AppLogger

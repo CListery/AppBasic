@@ -1,12 +1,10 @@
 package io.github.clistery.appbasic.demo
 
-import android.content.Intent
-import android.content.killAllOtherProcess
-import android.content.killProcessExceptMain
-import android.content.listenScreenOff
+import android.content.*
 import android.os.Process
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.multidex.MultiDexApplication
+import com.yh.appbasic.share.AppBasicShare
 import com.yh.appbasic.logger.LogsManager
 import com.yh.appbasic.logger.impl.TheLogFormatStrategy
 import com.yh.appbasic.logger.logI
@@ -32,6 +30,8 @@ class App : MultiDexApplication() {
         super.onCreate()
         
         instance = this
+        
+        AppBasicShare.install(this)
 
 //        val logFormatStrategy = DiskLogFormatStrategy.Builder(this, "app").build()
 ////        logD("log file: ${logFormatStrategy.getRealLogFile()}")
