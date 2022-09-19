@@ -2,6 +2,12 @@ plugins {
     id("app")
 }
 
+android {
+    defaultConfig {
+        buildConfigField("int", "LOG_METHOD_COUNT", "10")
+    }
+}
+
 dependencies {
     implementation(libs.androidXCoreKtx)
     implementation(libs.androidXAppcompat)

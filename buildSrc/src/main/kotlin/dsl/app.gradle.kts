@@ -20,8 +20,6 @@ android {
         multiDexEnabled = true
         
         vectorDrawables.useSupportLibrary = true
-        
-        buildConfigField("int", "LOG_METHOD_COUNT", "10")
     }
 //    sourceSets {
 //        named("main") {
