@@ -4,14 +4,23 @@ package com.yh.appbasic.util
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
 
 object PreferenceConst {
+    /**
+     * 全局默认的 SharedPreferences 文件名
+     */
     @JvmStatic
     var DEF_FILE_NAME = "common"
 }
 
 private val preferences = hashMapOf<String, SharedPreferences>()
 
+/**
+ * 获取指定的 SharedPreferences
+ *
+ * 默认获取 [PreferenceConst.DEF_FILE_NAME]
+ */
 fun Context.preference(preferenceName: String?): SharedPreferences {
     return preferences.getOrPut(
         preferenceName ?: PreferenceConst.DEF_FILE_NAME,
@@ -22,6 +31,21 @@ fun Context.preference(preferenceName: String?): SharedPreferences {
 }
 
 /**
+ * 清空指定的 SharedPreferences
+ */
+fun Context.cleanPreference(preferenceName: String?) {
+    if (preferenceName.isNullOrEmpty()) {
+        return
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        deleteSharedPreferences(preferenceName)
+    } else {
+        getSharedPreferences(preferenceName, Context.MODE_PRIVATE).edit().clear().commit()
+    }
+}
+
+/**
+ * 保存键值
  * @param [key] key
  * @param [value] if null, well be remove this [key]
  */
@@ -33,10 +57,11 @@ fun <T : Any> savePref(
     clazz: Class<T>? = value?.javaClass,
     preferenceName: String? = null,
 ): Boolean {
-    return context.preference(preferenceName).innerSavePref(key, value, clazz)
+    return context.preference(preferenceName).savePref(key, value, clazz)
 }
 
 /**
+ * 保存键值
  * @param [key] key
  * @param [value] if null, well be remove this [key]
  */
@@ -45,10 +70,13 @@ inline fun <reified T : Any> Context.savePref(
     value: T?,
     preferenceName: String? = null,
 ): Boolean {
-    return preference(preferenceName).innerSavePref(key, value)
+    return preference(preferenceName).savePref(key, value)
 }
 
-private fun <T : Any> SharedPreferences.innerSavePref(
+/**
+ * 保存键值
+ */
+fun <T : Any> SharedPreferences.savePref(
     key: String,
     value: T?,
     clazz: Class<T>?
@@ -70,7 +98,10 @@ private fun <T : Any> SharedPreferences.innerSavePref(
     }.commit()
 }
 
-inline fun <reified T : Any> SharedPreferences.innerSavePref(key: String, value: T?): Boolean {
+/**
+ * 保存键值
+ */
+inline fun <reified T : Any> SharedPreferences.savePref(key: String, value: T?): Boolean {
     return edit().apply {
         when (value) {
             is String -> putString(key, value)
@@ -84,6 +115,9 @@ inline fun <reified T : Any> SharedPreferences.innerSavePref(key: String, value:
     }.commit()
 }
 
+/**
+ * 获取键值
+ */
 fun <T : Any> getPref(
     context: Context,
     key: String,
@@ -91,18 +125,24 @@ fun <T : Any> getPref(
     clazz: Class<T> = defValue.javaClass,
     preferenceName: String? = null,
 ): T {
-    return context.preference(preferenceName).innerGetPref(key, defValue, clazz)
+    return context.preference(preferenceName).getPref(key, defValue, clazz)
 }
 
+/**
+ * 获取键值
+ */
 inline fun <reified T : Any> Context.getPref(
     key: String,
     defValue: T,
     preferenceName: String? = null,
 ): T {
-    return preference(preferenceName).innerGetPref(key, defValue)
+    return preference(preferenceName).getPref(key, defValue)
 }
 
-private fun <T : Any> SharedPreferences.innerGetPref(
+/**
+ * 获取键值
+ */
+fun <T : Any> SharedPreferences.getPref(
     key: String,
     defValue: T,
     clazz: Class<T>
@@ -123,7 +163,10 @@ private fun <T : Any> SharedPreferences.innerGetPref(
     return defValue
 }
 
-inline fun <reified T : Any> SharedPreferences.innerGetPref(key: String, defValue: T): T {
+/**
+ * 获取键值
+ */
+inline fun <reified T : Any> SharedPreferences.getPref(key: String, defValue: T): T {
     if (contains(key)) {
         @Suppress("IMPLICIT_CAST_TO_ANY") return (when (T::class) {
             String::class -> getString(key, defValue as String)

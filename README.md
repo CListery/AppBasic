@@ -7,7 +7,7 @@
 ## Use
 
 ```gradle
-implementation("io.github.clistery:appbasic:2.3.0")
+implementation("io.github.clistery:appbasic:2.4.0")
 ```
 
 ## 全局共享
