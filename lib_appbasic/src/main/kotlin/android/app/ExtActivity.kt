@@ -9,6 +9,7 @@ import androidx.annotation.IdRes
 import com.yh.appbasic.logger.logD
 import com.yh.appbasic.logger.logE
 import com.yh.appbasic.logger.owner.LibLogger
+import com.yh.appbasic.share.AppBasicShare
 import kotlin.concurrent.thread
 
 /**
@@ -50,21 +51,17 @@ val Activity.checkSoftInputVisibility
  * @param [block] 被执行的 block
  * @param [callback] 回调
  */
-fun <R> Activity.runWithLoading(
+fun <R> Activity?.runWithLoading(
     printCatching: Boolean = true,
     onCreateLoading: Activity.() -> Dialog,
     block: () -> R,
     callback: ((Result<R>) -> Unit)? = null,
 ) {
     fun Dialog?.operator(isOpen: Boolean) {
-        this?.also {
-            runOnUiThread {
-                if (isOpen) it.open() else it.close()
-            }
-        }
+        this?.also { AppBasicShare.runOnUiThread({ if (isOpen) it.open() else it.close() }) }
     }
     
-    val waitingDialog = if (isInvalid || !Looper.getMainLooper().isCurrentLooper) {
+    val waitingDialog = if (null == this || isInvalid || !Looper.getMainLooper().isCurrentLooper) {
         null
     } else {
         onCreateLoading()
@@ -75,7 +72,7 @@ fun <R> Activity.runWithLoading(
         if (r.isFailure && printCatching) {
             logE("invoke block failed!", throwable = r.exceptionOrNull())
         }
-        runOnUiThread { callback?.invoke(r) }
+        AppBasicShare.runOnUiThread({ callback?.invoke(r) })
         waitingDialog.operator(false)
     }
     if (Looper.getMainLooper().isCurrentLooper) {
