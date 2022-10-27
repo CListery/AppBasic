@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.os.Process
-import com.kotlin.isInitialized
 import com.kotlin.memoryId
 import com.yh.appbasic.logger.logD
 import com.yh.appbasic.logger.logW
@@ -48,9 +47,6 @@ object AppBasicShare {
     
     @JvmStatic
     fun runOnUiThread(runnable: Runnable, delayMillis: Long = 0) {
-        if (!this::innerUiHandler.isInitialized()) {
-            throw RuntimeException("must call onCreate() first!")
-        }
         logW("runOnUiThread: ${runnable.memoryId} on $delayMillis", LibLogger)
         if (delayMillis > 0) {
             innerUiHandler.postDelayed(runnable, delayMillis)
@@ -61,9 +57,6 @@ object AppBasicShare {
     
     @JvmStatic
     fun removeRunnable(runnable: Runnable) {
-        if (!this::innerUiHandler.isInitialized()) {
-            throw RuntimeException("must call onCreate() first!")
-        }
         logW("removeRunnable: ${runnable.memoryId}", LibLogger)
         innerUiHandler.removeCallbacks(runnable)
     }
