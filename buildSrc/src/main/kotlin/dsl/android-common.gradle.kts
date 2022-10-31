@@ -51,6 +51,9 @@ extensions.configure(com.android.build.api.dsl.CommonExtension::class) {
         checkDependencies = true
         ignoreTestSources = true
     }
+    sourceSets.named("main") {
+        java.srcDirs("src/main/java", "src/main/kotlin")
+    }
 }
 
 tasks.withType<KotlinCompile> {

@@ -40,9 +40,11 @@ object AppBasicShare {
     
     @JvmStatic
     fun install(context: Context) {
-        pid = Process.myPid()
-        innerAppContext = context.applicationContext as Application?
-        logD("$pid", this)
+        if (innerAppContext == null) {
+            pid = Process.myPid()
+            innerAppContext = context.applicationContext as Application?
+            logD("$pid", this)
+        }
     }
     
     @JvmStatic
