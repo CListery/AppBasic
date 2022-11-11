@@ -5,6 +5,7 @@ import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import com.yh.appbasic.logger.FormatStrategy
 import com.yh.appbasic.logger.LogStrategy
+import com.yh.appbasic.share.AppBasicShare
 import kotlin.math.min
 import kotlin.reflect.KClass
 
@@ -29,10 +30,8 @@ class TheLogFormatStrategy private constructor(private val builder: Builder) : F
         private const val BOTTOM_LEFT_CORNER = '└'
         private const val MIDDLE_CORNER = '├'
         private const val HORIZONTAL_LINE = '│'
-        private const val DOUBLE_DIVIDER =
-            "────────────────────────────────────────────────────────"
-        private const val SINGLE_DIVIDER =
-            "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄"
+        private const val DOUBLE_DIVIDER = "───────────────────────"
+        private const val SINGLE_DIVIDER = "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄"
         private const val TOP_BORDER = "$TOP_LEFT_CORNER$DOUBLE_DIVIDER$DOUBLE_DIVIDER"
         private const val BOTTOM_BORDER = "$BOTTOM_LEFT_CORNER$DOUBLE_DIVIDER$DOUBLE_DIVIDER"
         private const val MIDDLE_BORDER = "$MIDDLE_CORNER$SINGLE_DIVIDER$SINGLE_DIVIDER"
@@ -80,7 +79,7 @@ class TheLogFormatStrategy private constructor(private val builder: Builder) : F
             logLine(
                 logType,
                 tag,
-                "$HORIZONTAL_LINE Thread:${curThread.name} PID:${Process.myPid()}"
+                "$HORIZONTAL_LINE Thread:${curThread.name} ${AppBasicShare.processInfo?.processName ?: ""}:${Process.myPid()}"
             )
             logDivider(logType, tag)
         }

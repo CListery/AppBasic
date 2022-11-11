@@ -22,7 +22,6 @@ import javax.xml.transform.TransformerException
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.stream.StreamResult
 import javax.xml.transform.stream.StreamSource
-import kotlin.Throwable
 
 /**
  * 日志输出器实例
@@ -53,7 +52,9 @@ internal class TheLogPrinter : Printer {
      */
     fun adapter(adapter: LogAdapter?): Printer {
         if (null != adapter) {
-            localAdapter.set(adapter)
+            if (adapter.isEnable) {
+                localAdapter.set(adapter)
+            }
         }
         return this
     }
