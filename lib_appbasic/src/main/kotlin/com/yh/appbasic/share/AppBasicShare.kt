@@ -25,11 +25,7 @@ object AppBasicShare {
     var pid: Int = -1
     
     @JvmStatic
-    val processInfo: ActivityManager.RunningAppProcessInfo? by lazy {
-        val am: ActivityManager? = innerAppContext?.getSystemService()
-        val processes = am?.runningAppProcesses
-        processes?.find { it?.pid == pid }
-    }
+    var processInfo: ActivityManager.RunningAppProcessInfo? = null
     
     /**
      * 主线程handler
@@ -55,6 +51,9 @@ object AppBasicShare {
         if (innerAppContext == null) {
             pid = Process.myPid()
             innerAppContext = context.applicationContext as Application?
+            val am: ActivityManager? = innerAppContext?.getSystemService()
+            val processes = am?.runningAppProcesses
+            processInfo = processes?.find { it?.pid == pid }
             logD("$pid", this)
         }
     }
