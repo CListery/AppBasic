@@ -22,10 +22,11 @@ private val preferences = hashMapOf<String, SharedPreferences>()
  * 默认获取 [PreferenceConst.DEF_FILE_NAME]
  */
 fun Context.preference(preferenceName: String?): SharedPreferences {
+    val pn = preferenceName ?: PreferenceConst.DEF_FILE_NAME
     return preferences.getOrPut(
-        preferenceName ?: PreferenceConst.DEF_FILE_NAME,
+        pn,
         defaultValue = {
-            getSharedPreferences(preferenceName, Context.MODE_PRIVATE)
+            getSharedPreferences(pn, Context.MODE_PRIVATE)
         },
     )
 }
