@@ -3,6 +3,7 @@
 
 package com.kotlin
 
+import android.os.Build
 import com.yh.appbasic.logger.logE
 
 /**
@@ -42,7 +43,9 @@ fun getAppendStr(appendColon: Boolean, vararg stringArray: Any?) = getAppendStr(
  * @param stringArray 对象数组
  */
 fun getAppendStr(
-    separator: String? = ": ", appendColon: Boolean, vararg stringArray: Any?
+    separator: String? = ": ",
+    appendColon: Boolean,
+    vararg stringArray: Any?,
 ) = StringBuilder().apply {
     stringArray.forEachIndexed { index, str ->
         when (str) {
@@ -65,7 +68,7 @@ fun getAppendStr(
 @JvmOverloads
 inline fun <T, R> T?.runCatchingSafety(
     printCatching: Boolean = true,
-    block: T.() -> R
+    block: T.() -> R,
 ): Result<R> {
     val result = this?.runCatching(block) ?: Result.failure(NullPointerException("T is null"))
     if (result.isFailure && printCatching) {
@@ -83,11 +86,74 @@ inline fun <T, R> T?.runCatchingSafety(
 @JvmOverloads
 inline fun <R> runCatchingSafety(
     printCatching: Boolean = true,
-    block: () -> R
+    block: () -> R,
 ): Result<R> {
     val result = runCatching(block)
     if (result.isFailure && printCatching) {
         logE("invoke block failed!", throwable = result.exceptionOrNull())
     }
     return result
+}
+
+/**
+ * 当运行环境 api 版本达到指定时运行
+ */
+inline fun <R> runOnApi(api: Int, onApi: () -> R, otherApi: () -> R): Result<R> {
+    return runCatchingSafety {
+        if (Build.VERSION.SDK_INT == api) {
+            onApi()
+        } else {
+            otherApi()
+        }
+    }
+}
+
+/**
+ * 当运行环境 api 版本低于指定版本时
+ */
+inline fun <R> runOnApiDown(api: Int, onBelow: () -> R): Result<R>? {
+    return if (Build.VERSION.SDK_INT < api) {
+        runCatchingSafety { onBelow() }
+    } else {
+        null
+    }
+}
+
+/**
+ * 当运行环境 api 版本高于指定版本时
+ */
+inline fun <R> runOnApiUp(api: Int, onAbove: () -> R): Result<R>? {
+    return if (Build.VERSION.SDK_INT > api) {
+        runCatchingSafety {
+            onAbove()
+        }
+    } else {
+        null
+    }
+}
+
+/**
+ * 当运行环境 api 版本达到指定时运行
+ */
+inline fun <R> runOnApiDown(api: Int, onBelow: () -> R, onAbove: () -> R): Result<R> {
+    return runCatchingSafety {
+        if (Build.VERSION.SDK_INT < api) {
+            onBelow()
+        } else {
+            onAbove()
+        }
+    }
+}
+
+/**
+ * 当运行环境 api 版本达到指定时运行
+ */
+inline fun <R> runOnApiUp(api: Int, onAbove: () -> R, onBelow: () -> R): Result<R> {
+    return runCatchingSafety {
+        if (Build.VERSION.SDK_INT > api) {
+            onAbove()
+        } else {
+            onBelow()
+        }
+    }
 }
