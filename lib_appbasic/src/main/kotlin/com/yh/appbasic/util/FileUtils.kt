@@ -2,20 +2,32 @@
 
 package com.yh.appbasic.util
 
+import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.database.get
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.os.FileUtils
 import android.provider.MediaStore
+import android.provider.OpenableColumns
+import com.kotlin.runCatchingSafety
+import com.kotlin.runOnApiUp
 import com.kotlin.timeCurMillisecond
 import com.kotlin.timeFormatDate
 import com.yh.appbasic.logger.logE
 import com.yh.appbasic.logger.logW
+import com.yh.appbasic.share.AppBasicShare
 import java.io.*
+import java.text.DecimalFormat
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 /**
@@ -245,6 +257,9 @@ object FileUtils {
         return File(getLastingSubDirByName(dir), fileName)
     }
     
+    /**
+     * 向系统数据库中插入一张图片
+     */
     @JvmStatic
     @JvmOverloads
     fun Context.insertImage(
@@ -259,7 +274,7 @@ object FileUtils {
         @Suppress("DEPRECATION")
         contentValues.put(MediaStore.Images.Media.DATA, file.absolutePath)
         contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, name)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        runOnApiUp(Build.VERSION_CODES.P) {
             contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
             contentValues.put(MediaStore.Video.Media.IS_PENDING, 0)
         }
@@ -295,12 +310,16 @@ object FileUtils {
      * 生成文件名
      */
     @JvmStatic
-    private fun generateFileName(prefix: String, suffix: String): String {
-        return listOf(
+    private fun generateFileName(prefix: String, suffix: String? = null): String {
+        val name = listOf(
             prefix,
             timeCurMillisecond.timeFormatDate("yyyyMMdd_HHmmss"),
             RandomNumberGeneratorHolder.safeInt().toString(),
-        ).joinToString("_").plus(".$suffix")
+        ).joinToString("_")
+        if (suffix.isNullOrEmpty()) {
+            return name
+        }
+        return name.plus(".$suffix")
     }
     
     /**
@@ -343,6 +362,9 @@ object FileUtils {
         return false
     }
     
+    /**
+     * 从输入流复制到输出流
+     */
     @JvmStatic
     fun copy(inStream: InputStream, outputStream: OutputStream): Boolean {
         var byteread: Int
@@ -362,6 +384,9 @@ object FileUtils {
         return false
     }
     
+    /**
+     * 将文件输出到字节数组
+     */
     @JvmStatic
     fun fileToByteArray(file: File): ByteArray? {
         try {
@@ -374,11 +399,11 @@ object FileUtils {
                     return null
                 }
                 ByteArrayOutputStream().use { outputStream ->
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        FileUtils.copy(inputStream, outputStream)
-                    } else {
-                        copyInternalUserspace(inputStream, outputStream)
-                    }
+                    runOnApiUp(
+                        Build.VERSION_CODES.P,
+                        { FileUtils.copy(inputStream, outputStream) },
+                        { copyInternalUserspace(inputStream, outputStream) },
+                    )
                     return outputStream.toByteArray()
                 }
             }
@@ -401,6 +426,9 @@ object FileUtils {
         return progress
     }
     
+    /**
+     * 删除文件或目录下所有文件
+     */
     @JvmStatic
     @JvmOverloads
     fun deleteAll(file: File?, withOutFilter: ((File) -> Boolean)? = null) {
@@ -445,7 +473,44 @@ object FileUtils {
         }
     }
     
+    private fun getName(filename: String?): String? {
+        if (filename == null) {
+            return null
+        }
+        val index = filename.lastIndexOf('/')
+        return filename.substring(index + 1)
+    }
     
+    /**
+     * 转换文件大小
+     *
+     * Convert file size to string
+     *
+     * @param fileS
+     * @return
+     */
+    fun formatFileSize(fileS: Long): String {
+        val df = DecimalFormat("#.00")
+        val wrongSize = "0B"
+        if (fileS <= 0L) {
+            return wrongSize
+        }
+        return if (fileS < 1024) {
+            df.format(fileS.toDouble()) + "B"
+        } else if (fileS < 1048576) {
+            // 小于1MB = 1024 * 1024
+            df.format(fileS.toDouble() / 1024) + "KB"
+        } else if (fileS < 1073741824) {
+            // 小于1GB = 1024 * 1024 * 1024
+            df.format(fileS.toDouble() / 1048576) + "MB"
+        } else {
+            df.format(fileS.toDouble() / 1073741824) + "GB"
+        }
+    }
+    
+    /**
+     * mime
+     */
     enum class MimeType(
         val prefix: String,
         val mimeTypeName: String,
@@ -474,7 +539,285 @@ object FileUtils {
         HTML("HTML", "text/html", listOf("html", "htm", "HTML", "HTM")),
         LOG("LOG", "text/log", listOf("log")),
         
+        FILE("FILE", "*/*", listOf("")),
+        
         ;
     }
     
+    fun <R> bitmap(block: BitmapUtils.() -> R): Result<R> {
+        return runCatchingSafety { BitmapUtils.get().let(block) }
+    }
+    
+    /**
+     * Bitmap相关工具
+     */
+    class BitmapUtils private constructor() {
+        companion object {
+            private const val THUMB_SIZE = 200
+            
+            internal fun get() = BitmapUtils()
+        }
+        
+        /**
+         * 将 bitmap 保存为文件
+         */
+        fun Bitmap?.save(
+            dir: String?,
+            isLasting: Boolean = false,
+            outType: MimeType = MimeType.JPEG,
+            quality: Int = 100,
+        ): File? {
+            if (null == this) {
+                return null
+            }
+            if (dir.isNullOrEmpty()) {
+                return null
+            }
+            val dirF = File(dir)
+            if (!dirF.isDirectory || !dirF.exists()) {
+                return null
+            }
+            val format = when (outType) {
+                MimeType.PNG -> Bitmap.CompressFormat.PNG
+                MimeType.WEBP -> {
+                    @Suppress("DEPRECATION")
+                    runOnApiUp(Build.VERSION_CODES.Q, {
+                        if (quality < 100) {
+                            Bitmap.CompressFormat.WEBP_LOSSY
+                        } else {
+                            Bitmap.CompressFormat.WEBP_LOSSLESS
+                        }
+                    }, {
+                        Bitmap.CompressFormat.WEBP
+                    }).getOrDefault(Bitmap.CompressFormat.WEBP)
+                }
+                else -> Bitmap.CompressFormat.JPEG
+            }
+            return runCatchingSafety {
+                val bitmapF =
+                    if (isLasting) AppBasicShare.context.createLastingFileByType(dir, outType)
+                    else AppBasicShare.context.createCacheFileByType(dir, outType)
+                bitmapF.outputStream().buffered().use {
+                    compress(format, quality, it)
+                    it.flush()
+                }
+                return bitmapF
+            }.getOrNull()
+        }
+        
+        /**
+         * 图片文件转字节数组
+         */
+        fun File?.img2Bytes(
+            quality: Int = 100,
+            outW: Int = THUMB_SIZE,
+            outH: Int = THUMB_SIZE,
+        ): ByteArray? {
+            if (null == this) {
+                return null
+            }
+            return runCatchingSafety {
+                val options = BitmapFactory.Options()
+                options.inJustDecodeBounds = true
+                options.inSampleSize = 1
+                BitmapFactory.decodeFile(absolutePath, options)
+                options.inSampleSize = computeSize(options, outW, outH)
+                options.inJustDecodeBounds = false
+                
+                val bitmap = BitmapFactory.decodeFile(absolutePath, options)
+                
+                ByteArrayOutputStream().use {
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, quality, it)
+                    bitmap.recycle()
+                    it.toByteArray()
+                }
+            }.getOrNull()
+        }
+        
+        /**
+         * bitmap 转字节数组
+         */
+        fun Bitmap?.bytes(
+            quality: Int = 100,
+            outW: Int = THUMB_SIZE,
+            outH: Int = THUMB_SIZE,
+        ): ByteArray? {
+            if (null == this) {
+                return null
+            }
+            return runCatchingSafety {
+                val bytes = ByteArrayOutputStream().use {
+                    compress(Bitmap.CompressFormat.JPEG, 100, it)
+                    it.flush()
+                    it.toByteArray()
+                }
+                val inputStream = ByteArrayInputStream(bytes)
+                
+                val options = BitmapFactory.Options()
+                options.inJustDecodeBounds = true
+                options.inSampleSize = 1
+                BitmapFactory.decodeStream(inputStream, null, options)
+                options.inSampleSize = computeSize(options, outW, outH)
+                options.inJustDecodeBounds = false
+                
+                val bitmap = BitmapFactory.decodeStream(inputStream, null, options) ?: return null
+                inputStream.close()
+                
+                return@runCatchingSafety ByteArrayOutputStream().use {
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, quality, it)
+                    bitmap.recycle()
+                    it.toByteArray()
+                }
+            }.getOrNull()
+        }
+        
+        private fun computeSize(options: BitmapFactory.Options, outW: Int, outH: Int): Int {
+            var inSampleSize = 1
+            
+            val srcWidth = options.outWidth
+            val srcHeight = options.outHeight
+            
+            if (srcHeight > outH || srcWidth > outW) {
+                val longSide = max(outW, outH)
+                
+                val heightRatio = (srcHeight.toFloat() / longSide.toFloat()).roundToInt()
+                val widthRatio = (srcWidth.toFloat() / longSide.toFloat()).roundToInt()
+                inSampleSize = max(heightRatio, widthRatio)
+            }
+            return inSampleSize
+        }
+        
+    }
+    
+    fun <R> url(block: UriUtils.() -> R): Result<R> {
+        return runCatchingSafety { UriUtils.get().let(block) }
+    }
+    
+    @Suppress("MemberVisibilityCanBePrivate")
+    class UriUtils private constructor() {
+        companion object {
+            internal fun get() = UriUtils()
+        }
+        
+        /**
+         * 获取文件路径（19以上会触发文件拷贝）
+         */
+        fun Uri?.getFilePath(): String? {
+            return runOnApiUp(
+                Build.VERSION_CODES.JELLY_BEAN_MR2,
+                { getPathByCopyFile() },
+                { getRealFilePath() }
+            ).getOrNull()
+        }
+        
+        fun Uri?.getRealFilePath(): String? {
+            if (null == this) {
+                return null
+            }
+            when (scheme) {
+                ContentResolver.SCHEME_CONTENT -> {
+                    AppBasicShare.context.contentResolver.query(this,
+                        null,
+                        null,
+                        null,
+                        null
+                    )?.use {
+                        if (it.moveToFirst()) {
+                            @Suppress("DEPRECATION")
+                            return it.get(it.getColumnIndex(MediaStore.MediaColumns.DATA), "")
+                        }
+                    }
+                    return null
+                }
+                else -> return path
+            }
+        }
+        
+        private fun Uri?.getPathByCopyFile(): String? {
+            if (null == this) {
+                return null
+            }
+            val fileName = getFileName()
+            val file = if (fileName.isNullOrEmpty()) {
+                AppBasicShare.context.createCacheFileByType(DIRECTORY_DOCUMENTS, MimeType.FILE)
+            } else {
+                AppBasicShare.context.createCacheFile(DIRECTORY_DOCUMENTS, fileName)
+            }
+            val saveSuccess: Boolean = saveFileFromUri(file)
+            if (!saveSuccess) {
+                file.delete()
+                return null
+            }
+            return file.absolutePath
+        }
+        
+        fun Uri.getFileName(): String? {
+            val mimeType = AppBasicShare.context.contentResolver.getType(this)
+            if (mimeType == null) {
+                return getName(toString())
+            } else {
+                AppBasicShare.context.contentResolver.query(
+                    this,
+                    null,
+                    null,
+                    null,
+                    null,
+                )?.use {
+                    if (it.moveToFirst()) {
+                        return it.get(it.getColumnIndex(OpenableColumns.DISPLAY_NAME), "")
+                    }
+                }
+            }
+            return null
+        }
+        
+        private fun Uri?.saveFileFromUri(destinationFile: File): Boolean {
+            if (null == this) {
+                return false
+            }
+            
+            runCatchingSafety {
+                AppBasicShare.context.contentResolver.openInputStream(this)?.buffered()
+                    ?.use { input ->
+                        destinationFile.outputStream().buffered().use { output ->
+                            copy(input, output)
+                        }
+                    }
+            }.onFailure {
+                return false
+            }
+            return true
+        }
+        
+        /**
+         * @return Whether the Uri authority is ExternalStorageProvider.
+         */
+        fun Uri?.isExternalStorageDocument(): Boolean {
+            if (null == this) {
+                return false
+            }
+            return "com.android.externalstorage.documents" == authority
+        }
+        
+        /**
+         * @return Whether the Uri authority is DownloadsProvider.
+         */
+        fun Uri?.isDownloadsDocument(): Boolean {
+            if (null == this) {
+                return false
+            }
+            return "com.android.providers.downloads.documents" == authority
+        }
+        
+        /**
+         * @return Whether the Uri authority is MediaProvider.
+         */
+        fun Uri?.isMediaDocument(): Boolean {
+            if (null == this) {
+                return false
+            }
+            return "com.android.providers.media.documents" == authority
+        }
+        
+    }
 }
