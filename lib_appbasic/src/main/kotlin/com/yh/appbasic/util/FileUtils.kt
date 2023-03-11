@@ -23,12 +23,10 @@ import com.yh.appbasic.logger.logE
 import com.yh.appbasic.logger.logW
 import com.yh.appbasic.share.AppBasicShare
 import java.io.*
+import java.security.SecureRandom
 import java.text.DecimalFormat
-import java.util.concurrent.ThreadLocalRandom
-import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
-import kotlin.random.Random
 
 /**
  * Created by CYH on 2020/7/14 14:20
@@ -56,6 +54,9 @@ object FileUtils {
     
     @JvmStatic
     private lateinit var mLastingDir: File
+    
+    @JvmStatic
+    private val sr = SecureRandom()
     
     @JvmStatic
     private fun ensureLastingDir(context: Context) {
@@ -288,33 +289,44 @@ object FileUtils {
         }
     }
     
-    private object RandomNumberGeneratorHolder {
+    internal fun randomStrGenerator(): String {
+        val inputs = IntArray(16) { sr.nextInt() }
         
-        @JvmStatic
-        fun safeInt(bound: Int = 8): Int {
-            var num = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                ThreadLocalRandom.current().nextInt(bound)
+        var msb = 0
+        var lsb = 0
+        
+        inputs.forEachIndexed { index, num ->
+            if (index > 7) {
+                lsb = lsb.shl(8).or(num.and(0xFF))
             } else {
-                Random.nextInt(bound)
+                msb = msb.shl(8).or(num.and(0xFF))
             }
-            num = if (num == Int.MIN_VALUE) {
-                0 // corner case
-            } else {
-                abs(num)
-            }
-            return num
         }
+        
+        fun Int.digits(digits: Int, offset: Int = 0): String {
+            if (digits > 15) {
+                throw IllegalArgumentException("digits must be less than 15")
+            }
+            val num = shr(offset).toLong()
+            val hi = 1L.shl(digits * 4)
+            return hi.or(num.and(hi - 1)).toString(32).substring(1).uppercase()
+        }
+        
+        return arrayOf(
+            msb.digits(6),
+            lsb.digits(6),
+        ).joinToString("")
     }
     
     /**
      * 生成文件名
      */
     @JvmStatic
-    private fun generateFileName(prefix: String, suffix: String? = null): String {
+    internal fun generateFileName(prefix: String, suffix: String? = null): String {
         val name = listOf(
             prefix,
-            timeCurMillisecond.timeFormatDate("yyyyMMdd_HHmmss"),
-            RandomNumberGeneratorHolder.safeInt().toString(),
+            timeCurMillisecond.timeFormatDate("yyMMdd_HHmmss"),
+            randomStrGenerator(),
         ).joinToString("_")
         if (suffix.isNullOrEmpty()) {
             return name
