@@ -1,24 +1,19 @@
 package com.yh.appbasic
 
-import androidx.test.platform.app.InstrumentationRegistry
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-
+import com.google.common.truth.Truth.assertThat
+import com.yh.appbasic.share.AppBasicShare
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import org.junit.Assert.*
-
-/**
- * Instrumented test, which will execute on an Android device.
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 @RunWith(AndroidJUnit4::class)
 class ExampleInstrumentedTest {
     @Test
     fun useAppContext() {
-        // Context of the app under test.
-        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.yh.appbasic.test", appContext.packageName)
+//        val appContext = ApplicationProvider.getApplicationContext<Context>()
+        val appContext = AppBasicShare.context
+        assertThat("com.yh.appbasic.test").isEqualTo(appContext.packageName)
     }
 }

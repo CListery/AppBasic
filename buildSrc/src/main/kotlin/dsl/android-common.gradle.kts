@@ -17,12 +17,16 @@ extensions.configure(com.android.build.api.dsl.CommonExtension::class) {
     buildFeatures {
         viewBinding = true
     }
-    
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
     defaultConfig {
         this.minSdk = minSdkName.toInt()
 
-//        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        testInstrumentationRunner = "androidx.test.ext.junit.runners.AndroidJUnit4"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+//        testInstrumentationRunner = "androidx.test.ext.junit.runners.AndroidJUnit4"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
