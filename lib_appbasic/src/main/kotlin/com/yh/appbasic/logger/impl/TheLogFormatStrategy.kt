@@ -3,6 +3,8 @@ package com.yh.appbasic.logger.impl
 import android.os.Process
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
+import com.kotlin.decodeUnicodeString
+import com.kotlin.encodeUnicodeString
 import com.yh.appbasic.logger.FormatStrategy
 import com.yh.appbasic.logger.LogStrategy
 import com.yh.appbasic.share.AppBasicShare
@@ -125,13 +127,27 @@ class TheLogFormatStrategy private constructor(private val builder: Builder) : F
 
             if (length <= CHUNK_SIZE) {
                 logLine(priority, tag, "$HORIZONTAL_LINE $message")
-            } else if (length > CHUNK_SIZE) {
-                var index = 0
-                while (index < length) {
-                    val size = min(length - index, CHUNK_SIZE)
+            } else {
+                var pos = 0
+                while (pos < length) {
+                    var size = min(length - pos, CHUNK_SIZE)
                     //create a new String with system's default charset (which is UTF-8 for Android)
-                    logLine(priority, tag, String(bytes, index, size, Charsets.UTF_8))
-                    index += CHUNK_SIZE
+                    val slice = bytes.slice(pos until pos + size)
+                    val lastUnicodeStart = slice.lastIndexOf('\\'.code.toByte())
+                    if(lastUnicodeStart != -1) {
+                        if(lastUnicodeStart.inc() < slice.size) {
+                            val nextChar = slice[lastUnicodeStart.inc()].toInt().toChar()
+                            if(nextChar == 'u') {
+                                if(slice.size - lastUnicodeStart < 6) {
+                                    size = lastUnicodeStart
+                                }
+                            }
+                        } else {
+                            size = lastUnicodeStart
+                        }
+                    }
+                    logLine(priority, tag, String(bytes, pos, size, Charsets.UTF_8))
+                    pos += size
                 }
             }
         }

@@ -68,6 +68,28 @@
             android:layout_marginTop="20dp"
             android:text="Change libapp logger" />
 
+        <Button
+            android:id="@+id/btnEncodeUnicode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:text="Encode string by unicode" />
+
+        <Button
+            android:id="@+id/btnDecodeUnicode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="Decode string by unicode" />
+
+        <Button
+            android:id="@+id/btnLongLog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="Long log out test" />
+
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

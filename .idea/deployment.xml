@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
+    <serverData>
+      <paths name="dmds_dev">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$/versionControl" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="dmds_test">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$/versionControl" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="erp_dev">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$/versionControl" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="erp_test">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$/versionControl" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="fs_prod_0">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$/versionControl" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="fs_prod_1">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$/versionControl" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="fs_test">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$/versionControl" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="im_dev">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$/versionControl" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="mstas_prod_0">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$/versionControl" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="mstas_prod_1">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$/versionControl" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="ubuntu">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$/versionControl" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="ubuntu_zero">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$/versionControl" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

@@ -2,6 +2,7 @@ package com.yh.appbasic.logger.impl
 
 import android.util.Log
 import androidx.annotation.NonNull
+import com.kotlin.decodeUnicodeString
 import com.yh.appbasic.logger.LogStrategy
 
 /**
@@ -12,7 +13,7 @@ import com.yh.appbasic.logger.LogStrategy
 class LogcatLogStrategy : LogStrategy {
 
     override fun log(priority: Int, @NonNull tag: String, @NonNull message: String) {
-        Log.println(priority, tag, message)
+        Log.println(priority, tag, message.decodeUnicodeString())
     }
     
     override fun release() {

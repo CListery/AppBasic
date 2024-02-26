@@ -5,9 +5,20 @@ import android.database.MatrixCursor
 import android.os.Bundle
 import android.util.Log
 import android.view.onClick
-import com.yh.appbasic.logger.*
+import com.kotlin.decodeUnicodeString
+import com.kotlin.encodeUnicodeString
+import com.yh.appbasic.logger.LogAdapter
+import com.yh.appbasic.logger.LogOwner
+import com.yh.appbasic.logger.LogStrategy
+import com.yh.appbasic.logger.LogsManager
 import com.yh.appbasic.logger.impl.DiskLogFormatStrategy
 import com.yh.appbasic.logger.impl.TheLogFormatStrategy
+import com.yh.appbasic.logger.logCursor
+import com.yh.appbasic.logger.logD
+import com.yh.appbasic.logger.logE
+import com.yh.appbasic.logger.logJSON
+import com.yh.appbasic.logger.logOwner
+import com.yh.appbasic.logger.logW
 import com.yh.appbasic.ui.ViewBindingActivity
 import com.yh.libapp.LibApp
 import io.github.clistery.appbasic.demo.databinding.ActMainBinding
@@ -100,6 +111,42 @@ class MainAct : ViewBindingActivity<ActMainBinding>() {
                     .setShowThreadInfo(false)
                     .setMethodCount(0)
                     .build()
+            }
+        }
+        btnEncodeUnicode.onClick {
+            resources.assets.open("data.json").bufferedReader().useLines {
+                it.forEach {
+                    val owner = LogOwner { "MainAct" }.onCreateFormatStrategy { logTag ->
+                        TheLogFormatStrategy.newBuilder(logTag)
+                            .setLogStrategy(object : LogStrategy {
+                                override fun log(priority: Int, tag: String, message: String) {
+                                    Log.println(priority, tag, message)
+                                }
+                                
+                                override fun release() {
+                                
+                                }
+                            })
+                            .setShowThreadInfo(false)
+                            .setMethodCount(0)
+                            .build()
+                    }.on()
+                    logD(it.encodeUnicodeString(), loggable = owner)
+                }
+            }
+        }
+        btnDecodeUnicode.onClick {
+            resources.assets.open("data.json").bufferedReader().useLines {
+                it.forEach {
+                    logD(it.encodeUnicodeString())
+                }
+            }
+        }
+        btnLongLog.onClick {
+            resources.assets.open("data.json").bufferedReader().useLines {
+                it.forEach {
+                    logD(msg = it)
+                }
             }
         }
     }

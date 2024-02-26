@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.util.Log
+import com.kotlin.decodeUnicodeString
 import com.yh.appbasic.logger.LogStrategy
 import java.io.File
 import java.io.FileWriter
@@ -54,7 +55,7 @@ class DiskLogStrategy(private val handler: WriteHandler) : LogStrategy {
                 else -> {
                     com.kotlin.runCatchingSafety {
                         FileWriter(logFile, true).use {
-                            it.append(msg.obj.toString())
+                            it.append(msg.obj.toString().decodeUnicodeString())
                             it.flush()
                         }
                     }.onFailure {
