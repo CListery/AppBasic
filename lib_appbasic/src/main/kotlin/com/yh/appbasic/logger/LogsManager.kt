@@ -56,6 +56,9 @@ object LogsManager {
      */
     @JvmStatic
     private var diskLogKeepDay = 3
+    
+    var appLogger: () -> LogOwner = { AppLogger }
+    var libLogger: () -> LogOwner = { LibLogger }
     fun diskLogKeepDay(keepDay: Int) {
         this.diskLogKeepDay = keepDay
     }
@@ -91,13 +94,31 @@ object LogsManager {
      */
     @JvmStatic
     internal fun switchPrinter(printerProvider: Any?): Printer {
-        return when (printerProvider) {
-            is LogsManager -> switchPrinter(LibLogger).t("LogsMgr")
-            is AppBasicShare -> switchPrinter(LibLogger).t("AppBasic")
-            is LogOwner -> switchPrinter(printerProvider.logAdapter).t(printerProvider.logTag())
-            is LogAdapter -> printer.adapter(printerProvider)
-            is ILogger -> switchPrinter(findLogOwner(printerProvider))
-            else -> switchPrinter(AppLogger).t(printerProvider?.let { it::class.simpleName })
+        return when(printerProvider) {
+            is LogsManager   -> switchPrinter(libLogger()).t("LogsMgr")
+            is AppBasicShare -> switchPrinter(libLogger()).t("AppBasic")
+            is AppLogger     -> {
+                val owner = appLogger()
+                if(owner != AppLogger) {
+                    switchPrinter(owner)
+                } else {
+                    switchPrinter(printerProvider.logAdapter).t(printerProvider.logTag())
+                }
+            }
+            
+            is LibLogger     -> {
+                val owner = libLogger()
+                if(owner != LibLogger) {
+                    switchPrinter(owner)
+                } else {
+                    switchPrinter(printerProvider.logAdapter).t(printerProvider.logTag())
+                }
+            }
+            
+            is LogOwner      -> switchPrinter(printerProvider.logAdapter).t(printerProvider.logTag())
+            is LogAdapter    -> printer.adapter(printerProvider)
+            is ILogger       -> switchPrinter(findLogOwner(printerProvider))
+            else             -> switchPrinter(appLogger()).t(printerProvider?.let { it::class.simpleName })
         }
     }
     

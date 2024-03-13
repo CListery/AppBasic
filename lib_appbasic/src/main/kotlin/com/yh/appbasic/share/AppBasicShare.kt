@@ -6,13 +6,11 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.os.Process
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.getSystemService
 import com.kotlin.memoryId
 import com.yh.appbasic.logger.logD
 import com.yh.appbasic.logger.logW
 import com.yh.appbasic.logger.owner.LibLogger
-import kotlin.concurrent.thread
 
 @Suppress("unused")
 object AppBasicShare {

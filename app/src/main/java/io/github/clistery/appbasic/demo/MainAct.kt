@@ -1,11 +1,11 @@
 package io.github.clistery.appbasic.demo
 
+import android.app.checkSoftInputVisibility
 import android.content.Intent
 import android.database.MatrixCursor
 import android.os.Bundle
 import android.util.Log
 import android.view.onClick
-import com.kotlin.decodeUnicodeString
 import com.kotlin.encodeUnicodeString
 import com.yh.appbasic.logger.LogAdapter
 import com.yh.appbasic.logger.LogOwner
@@ -19,6 +19,7 @@ import com.yh.appbasic.logger.logE
 import com.yh.appbasic.logger.logJSON
 import com.yh.appbasic.logger.logOwner
 import com.yh.appbasic.logger.logW
+import com.yh.appbasic.logger.owner.AppLogger
 import com.yh.appbasic.ui.ViewBindingActivity
 import com.yh.libapp.LibApp
 import io.github.clistery.appbasic.demo.databinding.ActMainBinding
@@ -67,6 +68,7 @@ class MainAct : ViewBindingActivity<ActMainBinding>() {
     }
     
     override fun ActMainBinding.onInit(savedInstanceState: Bundle?) {
+        checkSoftInputVisibility
         btnOpenNext.onClick {
             logD("goNext")
             startActivity(Intent(mCtx, SecondAct::class.java))
@@ -116,22 +118,25 @@ class MainAct : ViewBindingActivity<ActMainBinding>() {
         btnEncodeUnicode.onClick {
             resources.assets.open("data.json").bufferedReader().useLines {
                 it.forEach {
-                    val owner = LogOwner { "MainAct" }.onCreateFormatStrategy { logTag ->
-                        TheLogFormatStrategy.newBuilder(logTag)
-                            .setLogStrategy(object : LogStrategy {
-                                override fun log(priority: Int, tag: String, message: String) {
-                                    Log.println(priority, tag, message)
-                                }
-                                
-                                override fun release() {
-                                
-                                }
-                            })
-                            .setShowThreadInfo(false)
-                            .setMethodCount(0)
-                            .build()
-                    }.on()
-                    logD(it.encodeUnicodeString(), loggable = owner)
+                    LogsManager.appLogger = {
+                        LogOwner { "MainAct" }.onCreateFormatStrategy { logTag ->
+                            TheLogFormatStrategy.newBuilder(logTag)
+                                .setLogStrategy(object : LogStrategy {
+                                    override fun log(priority: Int, tag: String, message: String) {
+                                        Log.println(priority, tag, message)
+                                    }
+                                    
+                                    override fun release() {
+                                    
+                                    }
+                                })
+                                .setShowThreadInfo(false)
+                                .setMethodCount(0)
+                                .build()
+                        }.on()
+                    }
+                    logD(it.encodeUnicodeString())
+                    LogsManager.appLogger = { AppLogger }
                 }
             }
         }
