@@ -35,13 +35,14 @@ object LogsManager {
     private val printer = TheLogPrinter()
     
     @JvmStatic
-    internal var diskLogRootDirName = "logs"
-    private val diskLogLockDirName: String = "${diskLogRootDirName}/lock"
+    var diskLogRootDirName = "logs"
+        internal set
+    val diskLogLockDirName: String = "${diskLogRootDirName}/lock"
     
-    private const val DATE_FORMAT = "yyyyMMdd"
+    const val DATE_FORMAT = "yyyyMMdd"
     
     @JvmStatic
-    internal val diskLogFileName: () -> String = {
+    val diskLogFileName: () -> String = {
         timeCurMillisecond.timeFormatDate(DATE_FORMAT)
     }
     
@@ -226,7 +227,7 @@ object LogsManager {
     }
     
     @JvmStatic
-    internal fun diskLogLocked(logFile: File) {
+    fun diskLogLocked(logFile: File) {
         thread {
             synchronized(LogsManager) {
                 val context = AppBasicShare.context
@@ -263,7 +264,7 @@ object LogsManager {
     }
     
     @JvmStatic
-    internal fun diskLogUnLocked(logFile: File) {
+    fun diskLogUnLocked(logFile: File) {
         thread {
             synchronized(LogsManager) {
                 val context = AppBasicShare.context
