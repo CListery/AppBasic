@@ -87,6 +87,12 @@ object LogsManager {
         }
     }
     
+    @JvmStatic
+    fun changeLogOwner(logger: ILogger, owner: LogOwner) {
+        val printerProviderName = logger::class.simpleName!!
+        loggers[printerProviderName] = owner
+    }
+    
     /**
      * 根据 [LogOwner] 获取 [Printer]
      *
@@ -118,7 +124,7 @@ object LogsManager {
             
             is LogOwner      -> switchPrinter(printerProvider.logAdapter).t(printerProvider.logTag())
             is LogAdapter    -> printer.adapter(printerProvider)
-            is ILogger       -> switchPrinter(findLogOwner(printerProvider))
+            is ILogger       -> switchPrinter(findLogOwner(printerProvider)).t(printerProvider::class.simpleName!!)
             else             -> switchPrinter(appLogger()).t(printerProvider?.let { it::class.simpleName })
         }
     }

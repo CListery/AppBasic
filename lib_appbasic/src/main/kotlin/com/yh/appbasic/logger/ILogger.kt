@@ -13,6 +13,10 @@ interface ILogger {
 }
 
 /**
- * 获取 [LogOwner]
+ * [LogOwner]
  */
-val ILogger.logOwner: LogOwner get() = LogsManager.findLogOwner(this)
+var ILogger.logOwner: LogOwner
+    get() = LogsManager.findLogOwner(this)
+    set(owner) {
+        LogsManager.changeLogOwner(this, owner)
+    }
