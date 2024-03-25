@@ -157,7 +157,7 @@ fun <T : Any> SharedPreferences.getPref(
             Long::class.java -> getLong(key, defValue as Long)
             Int::class.java -> getInt(key, defValue as Int)
             Boolean::class.java -> getBoolean(key, defValue as Boolean)
-            MutableList::class.java -> getStringSet(key, defValue as MutableSet<String>)
+            MutableSet::class.java -> getStringSet(key, defValue as MutableSet<String>)
             else -> throw RuntimeException("Can not support type:${clazz.simpleName} for get $key")
         }) as T
     }
@@ -175,7 +175,7 @@ inline fun <reified T : Any> SharedPreferences.getPref(key: String, defValue: T)
             Long::class -> getLong(key, defValue as Long)
             Int::class -> getInt(key, defValue as Int)
             Boolean::class -> getBoolean(key, defValue as Boolean)
-            MutableList::class -> @Suppress("UNCHECKED_CAST") getStringSet(
+            MutableSet::class -> @Suppress("UNCHECKED_CAST") getStringSet(
                 key, defValue as MutableSet<String>
             )
             else -> throw RuntimeException("Can not support type:${T::class.simpleName} for get $key")

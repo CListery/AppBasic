@@ -1,4 +1,4 @@
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.clistery/appbasic/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.clistery/appbasic)
+[![](https://jitpack.io/v/CListery/AppBasic.svg)](https://jitpack.io/#CListery/AppBasic) [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.clistery/appbasic/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.clistery/appbasic)
 
 # AppBasic
 
@@ -7,7 +7,7 @@
 ## Use
 
 ```gradle
-implementation("io.github.clistery:appbasic:2.4.0")
+implementation("io.github.clistery:appbasic:x.x.x")
 ```
 
 ## 全局共享

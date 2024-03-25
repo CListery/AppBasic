@@ -215,14 +215,18 @@ object LogsManager {
                         return@deleteAll true
                     }
                     if (keepDiskLog) {
-                        val date =
-                            fileName.split(DiskLogFormatStrategy.LOG_FILE_NAME_SEPARATOR)
-                                .lastOrNull().timeParseDate(DATE_FORMAT)
-                        val day = date?.differenceDay(Calendar.getInstance())
-                        if (null != day) {
-                            if (day < diskLogKeepDay) {
-                                return@deleteAll true
+                        try {
+                            val date =
+                                fileName.split(DiskLogFormatStrategy.LOG_FILE_NAME_SEPARATOR)
+                                    .lastOrNull().timeParseDate(DATE_FORMAT)
+                            val day = date?.differenceDay(Calendar.getInstance())
+                            if (null != day) {
+                                if (day < diskLogKeepDay) {
+                                    return@deleteAll true
+                                }
                             }
+                        } catch(e: Exception) {
+                            logE("cleanupDiskLogs: ${f.absolutePath}", throwable = e)
                         }
                     }
                     return@deleteAll false

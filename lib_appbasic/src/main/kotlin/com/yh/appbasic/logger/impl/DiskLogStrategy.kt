@@ -60,7 +60,7 @@ class DiskLogStrategy(private val handler: WriteHandler) : LogStrategy {
                         }
                     }.onFailure {
                         Log.e("LogsManager", msg.obj.toString(), it)
-                        throw it
+                        // throw it
                     }
                 }
             }
