@@ -56,13 +56,16 @@ object LogsManager {
      * 日志文件保留的最大时间，单位天
      */
     @JvmStatic
-    private var diskLogKeepDay = 3
+    private var _diskLogKeepDay = 3
     
     var appLogger: () -> LogOwner = { AppLogger }
     var libLogger: () -> LogOwner = { LibLogger }
     fun diskLogKeepDay(keepDay: Int) {
-        this.diskLogKeepDay = keepDay
+        this._diskLogKeepDay = keepDay
     }
+    
+    val diskLogKeepDay: Int
+        get() = _diskLogKeepDay
     
     @JvmStatic
     fun cleanup(context: Context, keepDiskLog: Boolean = true) {

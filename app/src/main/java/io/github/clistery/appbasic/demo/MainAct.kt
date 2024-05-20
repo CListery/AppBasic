@@ -28,7 +28,6 @@ import io.github.clistery.appbasic.demo.server.CrashJobServer
 import io.github.clistery.appbasic.demo.server.MySafeJobServer
 import io.github.clistery.appbasic.demo.server.TimerIntentServer
 import io.github.clistery.appbasic.demo.server.TimerJobServer
-import kotlin.random.Random
 
 class MainAct : ViewBindingActivity<ActMainBinding>() {
     
@@ -92,7 +91,7 @@ class MainAct : ViewBindingActivity<ActMainBinding>() {
         val diskLogs = arrayListOf<LogAdapter>()
         btnCreateDiskLog.onClick {
             val logFormatStrategy =
-                DiskLogFormatStrategy.Builder(mCtx, "disk-log-${Random.Default.nextInt()}").build()
+                DiskLogFormatStrategy.Builder(mCtx, "disk-log-${Math.random() * 1000000000}").build()
             Log.d("APP", "log file: ${logFormatStrategy.getRealLogFile()}")
             val logAdapter = LogAdapter(logFormatStrategy)
             diskLogs.add(logAdapter)
