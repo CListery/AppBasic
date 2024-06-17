@@ -8,6 +8,7 @@ import com.kotlin.encodeUnicodeString
 import com.yh.appbasic.logger.FormatStrategy
 import com.yh.appbasic.logger.LogStrategy
 import com.yh.appbasic.share.AppBasicShare
+import java.lang.Integer.*
 import kotlin.math.min
 import kotlin.reflect.KClass
 
@@ -88,29 +89,53 @@ class TheLogFormatStrategy private constructor(private val builder: Builder) : F
     }
 
     private fun logStack(logType: Int, @NonNull tag: String, curThread: Thread) {
-        val stackTrace = curThread.stackTrace
-        var level = ""
-        val reversedTrace = stackTrace.reversed()
-        val endIndex = reversedTrace.indexOfFirst { stackFilterClassNames.contains(it.className) }
-        val startIndex = if (endIndex > methodCount) {
-            endIndex - methodCount
-        } else {
-            0
-        }
-        reversedTrace.subList(startIndex, endIndex).forEach { traceElement ->
-            if (stackFilterClassNames.contains(traceElement.className)) {
-                return
+        if(methodCount > 0) {
+            val stackTrace = curThread.stackTrace
+            var reversedTrace = stackTrace.reversed()
+            
+            var endIndex = Int.MAX_VALUE
+            stackFilterClassNames.forEach { end ->
+                val index = reversedTrace.indexOfFirst { it.className.contains(end, true) }
+                if(index >= 0) {
+                    endIndex = min(index, endIndex)
+                }
             }
-            val builder = StringBuilder()
-            builder.append(HORIZONTAL_LINE).append(' ') //
-                .append(level) //
-                .append(getSimpleClassName(traceElement.className)).append(".")
-                .append(traceElement.methodName) // ZygoteInit.main
-                .append(" ") //
-                .append("(").append(traceElement.fileName).append(":")
-                .append(traceElement.lineNumber).append(")") // (ZygoteInit.java:987)
-            level += "   "
-            logLine(logType, tag, builder.toString())
+            if(endIndex >= 0 && endIndex < reversedTrace.size) {
+                reversedTrace = reversedTrace.subList(0, endIndex)
+            }
+            var startIndex = -1
+            reversedTrace = reversedTrace.reversed()
+            stackFilterClassNames.forEach { start ->
+                val index = reversedTrace.indexOfFirst { it.className.contains(start, true) }
+                if(index >= 0) {
+                    startIndex = max(index, startIndex)
+                }
+            }
+            if(startIndex >= 0) {
+                reversedTrace = reversedTrace.subList(startIndex, reversedTrace.size - 1)
+            }
+            reversedTrace = reversedTrace.reversed()
+            if(reversedTrace.size > methodCount) {
+                reversedTrace = reversedTrace.subList(
+                    reversedTrace.size - 1 - methodCount,
+                    reversedTrace.size - 1
+                )
+            }
+            if(reversedTrace.isNotEmpty()) {
+                var level = ""
+                reversedTrace.forEach { traceElement ->
+                    val builder = StringBuilder()
+                    builder.append(HORIZONTAL_LINE).append(' ') //
+                        .append(level) //
+                        .append(getSimpleClassName(traceElement.className)).append(".")
+                        .append(traceElement.methodName) // ZygoteInit.main
+                        .append(" ") //
+                        .append("(").append(traceElement.fileName).append(":")
+                        .append(traceElement.lineNumber).append(")") // (ZygoteInit.java:987)
+                    level += "   "
+                    logLine(logType, tag, builder.toString())
+                }
+            }
         }
     }
 
@@ -195,7 +220,7 @@ class TheLogFormatStrategy private constructor(private val builder: Builder) : F
         /**
          * 日志输出方式实例
          */
-        @Nullable
+        @NonNull
         private var logStrategy: LogStrategy = LogcatLogStrategy()
         
         /**
@@ -203,7 +228,8 @@ class TheLogFormatStrategy private constructor(private val builder: Builder) : F
          */
         private val stackFilterClassNames = hashSetOf(
             Class.forName("com.yh.appbasic.logger.Logs").name,
-            TheLogPrinter::class.java.name
+            TheLogPrinter::class.java.name,
+            TheLogFormatStrategy::class.java.name,
         )
 
         /**
