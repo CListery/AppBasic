@@ -3,8 +3,6 @@ package com.yh.appbasic.logger.impl
 import android.os.Process
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
-import com.kotlin.decodeUnicodeString
-import com.kotlin.encodeUnicodeString
 import com.yh.appbasic.logger.FormatStrategy
 import com.yh.appbasic.logger.LogStrategy
 import com.yh.appbasic.share.AppBasicShare
@@ -38,7 +36,9 @@ class TheLogFormatStrategy private constructor(private val builder: Builder) : F
         private const val TOP_BORDER = "$TOP_LEFT_CORNER$DOUBLE_DIVIDER$DOUBLE_DIVIDER"
         private const val BOTTOM_BORDER = "$BOTTOM_LEFT_CORNER$DOUBLE_DIVIDER$DOUBLE_DIVIDER"
         private const val MIDDLE_BORDER = "$MIDDLE_CORNER$SINGLE_DIVIDER$SINGLE_DIVIDER"
-
+        
+        private const val DEF_STACK_METHOD_COUNT = 3
+        
         @JvmStatic
         @NonNull
         fun newBuilder(firstTag: String): Builder {
@@ -89,52 +89,41 @@ class TheLogFormatStrategy private constructor(private val builder: Builder) : F
     }
 
     private fun logStack(logType: Int, @NonNull tag: String, curThread: Thread) {
-        if(methodCount > 0) {
-            val stackTrace = curThread.stackTrace
-            var reversedTrace = stackTrace.reversed()
-            
-            var endIndex = Int.MAX_VALUE
-            stackFilterClassNames.forEach { end ->
-                val index = reversedTrace.indexOfFirst { it.className.contains(end, true) }
-                if(index >= 0) {
-                    endIndex = min(index, endIndex)
-                }
+        var reversedTrace = curThread.stackTrace.toList()
+        
+        var endIndex = -1
+        stackFilterClassNames.forEach { end ->
+            val index = reversedTrace.indexOfLast {
+                it.className.equals(end)
+                        || it.className.split(".").lastOrNull()?.equals(end) ?: false
             }
-            if(endIndex >= 0 && endIndex < reversedTrace.size) {
-                reversedTrace = reversedTrace.subList(0, endIndex)
+            if(index >= 0) {
+                endIndex = max(index, endIndex)
             }
-            var startIndex = -1
-            reversedTrace = reversedTrace.reversed()
-            stackFilterClassNames.forEach { start ->
-                val index = reversedTrace.indexOfFirst { it.className.contains(start, true) }
-                if(index >= 0) {
-                    startIndex = max(index, startIndex)
-                }
-            }
-            if(startIndex >= 0) {
-                reversedTrace = reversedTrace.subList(startIndex, reversedTrace.size - 1)
-            }
-            reversedTrace = reversedTrace.reversed()
-            if(reversedTrace.size > methodCount) {
-                reversedTrace = reversedTrace.subList(
-                    reversedTrace.size - 1 - methodCount,
-                    reversedTrace.size - 1
-                )
-            }
-            if(reversedTrace.isNotEmpty()) {
-                var level = ""
-                reversedTrace.forEach { traceElement ->
-                    val builder = StringBuilder()
-                    builder.append(HORIZONTAL_LINE).append(' ') //
-                        .append(level) //
-                        .append(getSimpleClassName(traceElement.className)).append(".")
-                        .append(traceElement.methodName) // ZygoteInit.main
-                        .append(" ") //
-                        .append("(").append(traceElement.fileName).append(":")
-                        .append(traceElement.lineNumber).append(")") // (ZygoteInit.java:987)
-                    level += "   "
-                    logLine(logType, tag, builder.toString())
-                }
+        }
+        if(endIndex >= 0 && endIndex < reversedTrace.size) {
+            reversedTrace = reversedTrace.subList(endIndex, reversedTrace.size - 1)
+        }
+        reversedTrace = reversedTrace.reversed()
+        if(reversedTrace.size > methodCount) {
+            reversedTrace = reversedTrace.subList(
+                reversedTrace.size - 1 - methodCount,
+                reversedTrace.size - 1
+            )
+        }
+        if(reversedTrace.isNotEmpty()) {
+            var level = ""
+            reversedTrace.forEach { traceElement ->
+                val builder = StringBuilder()
+                builder.append(HORIZONTAL_LINE).append(' ') //
+                    .append(level) //
+                    .append(getSimpleClassName(traceElement.className)).append(".")
+                    .append(traceElement.methodName) // ZygoteInit.main
+                    .append(" ") //
+                    .append("(").append(traceElement.fileName).append(":")
+                    .append(traceElement.lineNumber).append(")") // (ZygoteInit.java:987)
+                level += "   "
+                logLine(logType, tag, builder.toString())
             }
         }
     }
@@ -212,7 +201,7 @@ class TheLogFormatStrategy private constructor(private val builder: Builder) : F
         /**
          * 日志跟踪行数
          */
-        private var methodCount = 2
+        private var methodCount = DEF_STACK_METHOD_COUNT
         /**
          * 是否显示线程信息
          */
@@ -227,7 +216,7 @@ class TheLogFormatStrategy private constructor(private val builder: Builder) : F
          * 不输出到日志中的类
          */
         private val stackFilterClassNames = hashSetOf(
-            Class.forName("com.yh.appbasic.logger.Logs").name,
+            "com.yh.appbasic.logger.Logs",
             TheLogPrinter::class.java.name,
             TheLogFormatStrategy::class.java.name,
         )
@@ -250,6 +239,14 @@ class TheLogFormatStrategy private constructor(private val builder: Builder) : F
          */
         fun setStackFilter(vararg clazz: Class<*>): Builder {
             stackFilterClassNames.addAll(clazz.map { it.name })
+            return this
+        }
+
+        /**
+         * 设置堆栈过滤
+         */
+        fun setStackFilter(vararg filter: String): Builder {
+            stackFilterClassNames.addAll(filter)
             return this
         }
 
